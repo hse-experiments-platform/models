@@ -46,7 +46,7 @@ service ModelsService {
 
   rpc GetFullModel(GetFullModelRequest) returns (GetFullModelResponse) {
     option (google.api.http) = {
-      get: "/api/v1/model/{modelID}"
+      get: "/api/v1/models/{modelID}"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       security: {security_requirement: {key: "AccessToken";value: {}}}
