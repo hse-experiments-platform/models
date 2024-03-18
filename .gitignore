@@ -22,5 +22,4 @@ go.work
 
 .idea
 bin
-api/buf.lock
 # .env
