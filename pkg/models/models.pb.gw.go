@@ -246,7 +246,7 @@ func RegisterModelsServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/github.hse_experiments_platform.models.ModelsService/GetFullModel", runtime.WithHTTPPathPattern("/api/v1/model/{modelID}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/github.hse_experiments_platform.models.ModelsService/GetFullModel", runtime.WithHTTPPathPattern("/api/v1/models/{modelID}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -382,7 +382,7 @@ func RegisterModelsServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/github.hse_experiments_platform.models.ModelsService/GetFullModel", runtime.WithHTTPPathPattern("/api/v1/model/{modelID}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/github.hse_experiments_platform.models.ModelsService/GetFullModel", runtime.WithHTTPPathPattern("/api/v1/models/{modelID}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -448,7 +448,7 @@ func RegisterModelsServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 var (
 	pattern_ModelsService_GetModels_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "models"}, ""))
 
-	pattern_ModelsService_GetFullModel_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "model", "modelID"}, ""))
+	pattern_ModelsService_GetFullModel_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "models", "modelID"}, ""))
 
 	pattern_ModelsService_GetTrainedModels_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "trained"}, ""))
 

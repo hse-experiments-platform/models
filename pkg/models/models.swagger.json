@@ -20,42 +20,6 @@
     "application/json"
   ],
   "paths": {
-    "/api/v1/model/{modelID}": {
-      "get": {
-        "operationId": "ModelsService_GetFullModel",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/modelsGetFullModelResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "modelID",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "uint64"
-          }
-        ],
-        "tags": [
-          "ModelsService"
-        ],
-        "security": [
-          {
-            "AccessToken": []
-          }
-        ]
-      }
-    },
     "/api/v1/models": {
       "get": {
         "operationId": "ModelsService_GetModels",
@@ -93,6 +57,42 @@
             "in": "query",
             "required": false,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "ModelsService"
+        ],
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ]
+      }
+    },
+    "/api/v1/models/{modelID}": {
+      "get": {
+        "operationId": "ModelsService_GetFullModel",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/modelsGetFullModelResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "modelID",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
           }
         ],
         "tags": [
