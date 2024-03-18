@@ -1,0 +1,174 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+package github.hse_experiments_platform.models;
+
+option go_package = "github.com/hse-experiments-platform/models;models";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "HSE MLOps Models service";
+    version: "1.0";
+    description: "Models service for mlops project.",
+  };
+
+  security_definitions: {
+    security: {
+      key: "AccessToken";
+      value: {
+        type: TYPE_API_KEY;
+        description: "Enter the token with the `Bearer: ` prefix, e.g. \"Bearer abcde12345\""
+        in: IN_HEADER;
+        name: "Authorization";
+      }
+    }
+  };
+
+  schemes: HTTP;
+  consumes: "application/json";
+  produces: "application/json";
+};
+
+service ModelsService {
+  rpc GetModels(GetModelsRequest) returns (GetModelsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/models"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      security: {security_requirement: {key: "AccessToken";value: {}}}
+    };
+  };
+
+  rpc GetFullModel(GetFullModelRequest) returns (GetFullModelResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/model/{modelID}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      security: {security_requirement: {key: "AccessToken";value: {}}}
+    };
+  };
+
+  rpc GetTrainedModels(GetTrainedModelsRequest) returns (GetTrainedModelsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/trained"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      security: {security_requirement: {key: "AccessToken";value: {}}}
+    };
+  };
+
+  rpc GetFullTrainedModel(GetFullTrainedModelRequest) returns (GetFullTrainedModelResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/trained/{trainedModelID}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      security: {security_requirement: {key: "AccessToken";value: {}}}
+    };
+  };
+}
+
+message Hyperparameter {
+  uint64 id = 1;
+  string name = 2;
+  string description = 3;
+  string type = 4;
+  google.protobuf.Struct defaultValue = 5;
+}
+
+message Metric {
+  uint64 id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message Problem {
+  uint64 id = 1;
+  string name = 2;
+  string description = 3;
+  repeated Metric metrics = 4;
+}
+
+message ShortModel {
+  uint64 model_id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message Model {
+  uint64 model_id = 1;
+  string name = 2;
+  string description = 3;
+  repeated Hyperparameter hyperparameters = 4;
+  Problem problem = 5;
+}
+
+message PageInfo {
+  uint64 offset = 1;
+  uint64 limit = 2;
+  uint64 total = 3;
+}
+
+message GetModelsRequest {
+  uint64 limit = 1;
+  uint64 offset = 2;
+  string query = 3;
+}
+message GetModelsResponse {
+  repeated ShortModel models = 1;
+  PageInfo pageInfo = 2;
+}
+
+message GetFullModelRequest {
+  uint64 modelID = 1;
+}
+message GetFullModelResponse {
+  Model model = 1;
+}
+
+message DatasetSchema {
+  message SchemaColumn {
+    string name = 1;
+    string type = 2;
+  }
+
+  repeated SchemaColumn columns = 1;
+}
+
+message ShortTrainedModel {
+  uint64 trainedModelID = 1;
+  uint64 baseModelID = 2;
+  string name = 3;
+  google.protobuf.Timestamp createdAt = 4;
+}
+message TrainedModel {
+  uint64 trainedModelID = 1;
+  uint64 baseModelID = 2;
+  string name = 3;
+  google.protobuf.Timestamp createdAt = 4;
+  string targetColumn = 5;
+  DatasetSchema schema = 6;
+}
+
+message GetTrainedModelsRequest {
+  uint64 limit = 1;
+  uint64 offset = 2;
+  string query = 3;
+  uint64 baseModelID = 4;
+}
+message GetTrainedModelsResponse {
+  repeated ShortTrainedModel models = 1;
+  PageInfo pageInfo = 2;
+}
+
+message GetFullTrainedModelRequest {
+  uint64 trainedModelID = 1;
+}
+message GetFullTrainedModelResponse {
+  TrainedModel model = 1;
+}
+

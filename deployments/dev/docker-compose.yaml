@@ -1,0 +1,21 @@
+version: "3.8"
+
+name: models
+
+services:
+  models:
+    build:
+      context: ../../
+      dockerfile: build/Dockerfile
+    environment:
+      - DOTENV_FILE=configs/dev/.env
+      - DB_CONNECT_STRING=postgresql://hseuser:P@ssw0rd@db:5432/hsedb
+    ports:
+      - "8085:8085"
+      - "8086:8086"
+    networks:
+      - auth_hse-net
+
+networks:
+  auth_hse-net:
+    external: true
