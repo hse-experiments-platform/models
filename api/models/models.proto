@@ -86,6 +86,11 @@ message Metric {
   string description = 3;
 }
 
+message ShortProblem {
+  uint64 id = 1;
+  string name = 2;
+}
+
 message Problem {
   uint64 id = 1;
   string name = 2;
@@ -139,19 +144,38 @@ message DatasetSchema {
   repeated SchemaColumn columns = 1;
 }
 
+enum TrainStatus {
+  TrainStatusUnknown = 0;
+  TrainStatusNotStarted = 1;
+  TrainStatusInProgress = 2;
+  TrainStatusError = 3;
+  TrainStatusDone = 4;
+}
+
 message ShortTrainedModel {
   uint64 trainedModelID = 1;
-  uint64 baseModelID = 2;
-  string name = 3;
-  google.protobuf.Timestamp createdAt = 4;
+  string name = 2;
+  TrainStatus trainStatus = 3;
+  uint64 baseModelID = 4;
+  string baseModeName = 5;
+  ShortProblem problem = 6;
+  uint64 trainDatasetID = 7;
+  uint64 trainDatasetName = 8;
+  google.protobuf.Timestamp createdAt = 9;
 }
 message TrainedModel {
   uint64 trainedModelID = 1;
-  uint64 baseModelID = 2;
-  string name = 3;
-  google.protobuf.Timestamp createdAt = 4;
-  string targetColumn = 5;
-  DatasetSchema schema = 6;
+  string name = 2;
+  TrainStatus trainStatus = 3;
+  uint64 baseModelID = 4;
+  string baseModeName = 5;
+  ShortProblem problem = 6;
+  uint64 trainDatasetID = 7;
+  uint64 trainDatasetName = 8;
+  google.protobuf.Timestamp createdAt = 9;
+  string targetColumn = 10;
+  DatasetSchema schema = 11;
+  string trainError = 12;
 }
 
 message GetTrainedModelsRequest {

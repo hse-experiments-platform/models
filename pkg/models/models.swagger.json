@@ -383,6 +383,18 @@
         }
       }
     },
+    "modelsShortProblem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
     "modelsShortTrainedModel": {
       "type": "object",
       "properties": {
@@ -390,18 +402,46 @@
           "type": "string",
           "format": "uint64"
         },
+        "name": {
+          "type": "string"
+        },
+        "trainStatus": {
+          "$ref": "#/definitions/modelsTrainStatus"
+        },
         "baseModelID": {
           "type": "string",
           "format": "uint64"
         },
-        "name": {
+        "baseModeName": {
           "type": "string"
+        },
+        "problem": {
+          "$ref": "#/definitions/modelsShortProblem"
+        },
+        "trainDatasetID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "trainDatasetName": {
+          "type": "string",
+          "format": "uint64"
         },
         "createdAt": {
           "type": "string",
           "format": "date-time"
         }
       }
+    },
+    "modelsTrainStatus": {
+      "type": "string",
+      "enum": [
+        "TrainStatusUnknown",
+        "TrainStatusNotStarted",
+        "TrainStatusInProgress",
+        "TrainStatusError",
+        "TrainStatusDone"
+      ],
+      "default": "TrainStatusUnknown"
     },
     "modelsTrainedModel": {
       "type": "object",
@@ -410,12 +450,29 @@
           "type": "string",
           "format": "uint64"
         },
+        "name": {
+          "type": "string"
+        },
+        "trainStatus": {
+          "$ref": "#/definitions/modelsTrainStatus"
+        },
         "baseModelID": {
           "type": "string",
           "format": "uint64"
         },
-        "name": {
+        "baseModeName": {
           "type": "string"
+        },
+        "problem": {
+          "$ref": "#/definitions/modelsShortProblem"
+        },
+        "trainDatasetID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "trainDatasetName": {
+          "type": "string",
+          "format": "uint64"
         },
         "createdAt": {
           "type": "string",
@@ -426,6 +483,9 @@
         },
         "schema": {
           "$ref": "#/definitions/modelsDatasetSchema"
+        },
+        "trainError": {
+          "type": "string"
         }
       }
     },
