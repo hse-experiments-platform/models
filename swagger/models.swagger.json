@@ -57,6 +57,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "problemID",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
           }
         ],
         "tags": [
@@ -93,6 +100,55 @@
             "required": true,
             "type": "string",
             "format": "uint64"
+          }
+        ],
+        "tags": [
+          "ModelsService"
+        ],
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ]
+      }
+    },
+    "/api/v1/problems": {
+      "get": {
+        "operationId": "ModelsService_GetProblems",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/modelsGetProblemsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -253,6 +309,21 @@
         }
       }
     },
+    "modelsGetProblemsResponse": {
+      "type": "object",
+      "properties": {
+        "problems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/modelsShortProblem"
+          }
+        },
+        "pageInfo": {
+          "$ref": "#/definitions/modelsPageInfo"
+        }
+      }
+    },
     "modelsGetTrainedModelsResponse": {
       "type": "object",
       "properties": {
@@ -389,6 +460,9 @@
           "format": "uint64"
         },
         "name": {
+          "type": "string"
+        },
+        "description": {
           "type": "string"
         }
       }

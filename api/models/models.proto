@@ -35,6 +35,15 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 
 service ModelsService {
+  rpc GetProblems(GetProblemsRequest) returns (GetProblemsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/problems"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      security: {security_requirement: {key: "AccessToken";value: {}}}
+    };
+  };
+
   rpc GetModels(GetModelsRequest) returns (GetModelsResponse) {
     option (google.api.http) = {
       get: "/api/v1/models"
@@ -89,6 +98,7 @@ message Metric {
 message ShortProblem {
   uint64 id = 1;
   string name = 2;
+  string description = 3;
 }
 
 message Problem {
@@ -118,10 +128,22 @@ message PageInfo {
   uint64 total = 3;
 }
 
+message GetProblemsRequest {
+  uint64 limit = 1;
+  uint64 offset = 2;
+  string query = 3;
+}
+
+message GetProblemsResponse {
+ repeated ShortProblem problems = 1;
+  PageInfo pageInfo = 2;
+}
+
 message GetModelsRequest {
   uint64 limit = 1;
   uint64 offset = 2;
   string query = 3;
+  uint64 problemID = 4;
 }
 message GetModelsResponse {
   repeated ShortModel models = 1;

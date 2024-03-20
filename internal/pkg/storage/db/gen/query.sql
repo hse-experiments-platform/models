@@ -4,7 +4,7 @@ select id,
        description,
        count(1) over () as count
 from models
-where name like $1
+where name like $1 and (problem_id = $4 or $4 = 0)
 order by created_at desc
 limit $2 offset $3;
 
@@ -38,3 +38,13 @@ select h.id,
 from models m
          join hyperparameters h on m.id = h.model_id
 where m.id = $1;
+
+-- name: GetProblems :many
+select id,
+       name,
+       description,
+       count(1) over () as count
+from problems
+where name like $1
+order by created_at desc
+limit $2 offset $3;

@@ -119,15 +119,16 @@ select id,
        description,
        count(1) over () as count
 from models
-where name like $1
+where name like $1 and (problem_id = $4 or $4 = 0)
 order by created_at desc
 limit $2 offset $3
 `
 
 type GetModelsParams struct {
-	Name   string
-	Limit  int64
-	Offset int64
+	Name      string
+	Limit     int64
+	Offset    int64
+	ProblemID int64
 }
 
 type GetModelsRow struct {
@@ -138,7 +139,12 @@ type GetModelsRow struct {
 }
 
 func (q *Queries) GetModels(ctx context.Context, arg GetModelsParams) ([]GetModelsRow, error) {
-	rows, err := q.db.Query(ctx, getModels, arg.Name, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, getModels,
+		arg.Name,
+		arg.Limit,
+		arg.Offset,
+		arg.ProblemID,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -146,6 +152,55 @@ func (q *Queries) GetModels(ctx context.Context, arg GetModelsParams) ([]GetMode
 	var items []GetModelsRow
 	for rows.Next() {
 		var i GetModelsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Count,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getProblems = `-- name: GetProblems :many
+select id,
+       name,
+       description,
+       count(1) over () as count
+from problems
+where name like $1
+order by created_at desc
+limit $2 offset $3
+`
+
+type GetProblemsParams struct {
+	Name   string
+	Limit  int64
+	Offset int64
+}
+
+type GetProblemsRow struct {
+	ID          int64
+	Name        string
+	Description string
+	Count       int64
+}
+
+func (q *Queries) GetProblems(ctx context.Context, arg GetProblemsParams) ([]GetProblemsRow, error) {
+	rows, err := q.db.Query(ctx, getProblems, arg.Name, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetProblemsRow
+	for rows.Next() {
+		var i GetProblemsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,

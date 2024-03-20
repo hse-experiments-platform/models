@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
+	ModelsService_GetProblems_FullMethodName         = "/github.hse_experiments_platform.models.ModelsService/GetProblems"
 	ModelsService_GetModels_FullMethodName           = "/github.hse_experiments_platform.models.ModelsService/GetModels"
 	ModelsService_GetFullModel_FullMethodName        = "/github.hse_experiments_platform.models.ModelsService/GetFullModel"
 	ModelsService_GetTrainedModels_FullMethodName    = "/github.hse_experiments_platform.models.ModelsService/GetTrainedModels"
@@ -29,6 +30,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ModelsServiceClient interface {
+	GetProblems(ctx context.Context, in *GetProblemsRequest, opts ...grpc.CallOption) (*GetProblemsResponse, error)
 	GetModels(ctx context.Context, in *GetModelsRequest, opts ...grpc.CallOption) (*GetModelsResponse, error)
 	GetFullModel(ctx context.Context, in *GetFullModelRequest, opts ...grpc.CallOption) (*GetFullModelResponse, error)
 	GetTrainedModels(ctx context.Context, in *GetTrainedModelsRequest, opts ...grpc.CallOption) (*GetTrainedModelsResponse, error)
@@ -41,6 +43,15 @@ type modelsServiceClient struct {
 
 func NewModelsServiceClient(cc grpc.ClientConnInterface) ModelsServiceClient {
 	return &modelsServiceClient{cc}
+}
+
+func (c *modelsServiceClient) GetProblems(ctx context.Context, in *GetProblemsRequest, opts ...grpc.CallOption) (*GetProblemsResponse, error) {
+	out := new(GetProblemsResponse)
+	err := c.cc.Invoke(ctx, ModelsService_GetProblems_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *modelsServiceClient) GetModels(ctx context.Context, in *GetModelsRequest, opts ...grpc.CallOption) (*GetModelsResponse, error) {
@@ -83,6 +94,7 @@ func (c *modelsServiceClient) GetFullTrainedModel(ctx context.Context, in *GetFu
 // All implementations should embed UnimplementedModelsServiceServer
 // for forward compatibility
 type ModelsServiceServer interface {
+	GetProblems(context.Context, *GetProblemsRequest) (*GetProblemsResponse, error)
 	GetModels(context.Context, *GetModelsRequest) (*GetModelsResponse, error)
 	GetFullModel(context.Context, *GetFullModelRequest) (*GetFullModelResponse, error)
 	GetTrainedModels(context.Context, *GetTrainedModelsRequest) (*GetTrainedModelsResponse, error)
@@ -93,6 +105,9 @@ type ModelsServiceServer interface {
 type UnimplementedModelsServiceServer struct {
 }
 
+func (UnimplementedModelsServiceServer) GetProblems(context.Context, *GetProblemsRequest) (*GetProblemsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProblems not implemented")
+}
 func (UnimplementedModelsServiceServer) GetModels(context.Context, *GetModelsRequest) (*GetModelsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetModels not implemented")
 }
@@ -115,6 +130,24 @@ type UnsafeModelsServiceServer interface {
 
 func RegisterModelsServiceServer(s grpc.ServiceRegistrar, srv ModelsServiceServer) {
 	s.RegisterService(&ModelsService_ServiceDesc, srv)
+}
+
+func _ModelsService_GetProblems_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProblemsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ModelsServiceServer).GetProblems(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ModelsService_GetProblems_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModelsServiceServer).GetProblems(ctx, req.(*GetProblemsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _ModelsService_GetModels_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -196,6 +229,10 @@ var ModelsService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "github.hse_experiments_platform.models.ModelsService",
 	HandlerType: (*ModelsServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetProblems",
+			Handler:    _ModelsService_GetProblems_Handler,
+		},
 		{
 			MethodName: "GetModels",
 			Handler:    _ModelsService_GetModels_Handler,

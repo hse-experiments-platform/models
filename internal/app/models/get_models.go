@@ -10,9 +10,10 @@ import (
 
 func (s *modelsService) GetModels(ctx context.Context, req *pb.GetModelsRequest) (*pb.GetModelsResponse, error) {
 	modelRows, err := s.commonDB.GetModels(ctx, db.GetModelsParams{
-		Name:   "%" + req.GetQuery() + "%",
-		Limit:  int64(req.GetLimit()),
-		Offset: int64(req.GetOffset()),
+		Name:      "%" + req.GetQuery() + "%",
+		Limit:     int64(req.GetLimit()),
+		Offset:    int64(req.GetOffset()),
+		ProblemID: int64(req.GetProblemID()),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("s.commonDB.GetModels: %w", err)
