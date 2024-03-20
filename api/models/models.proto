@@ -77,7 +77,7 @@ message Hyperparameter {
   string name = 2;
   string description = 3;
   string type = 4;
-  google.protobuf.Struct defaultValue = 5;
+  google.protobuf.Value defaultValue = 5;
 }
 
 message Metric {

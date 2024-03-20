@@ -284,9 +284,7 @@
         "type": {
           "type": "string"
         },
-        "defaultValue": {
-          "type": "object"
-        }
+        "defaultValue": {}
       }
     },
     "modelsMetric": {

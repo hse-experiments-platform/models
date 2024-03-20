@@ -1,59 +1,40 @@
--- name: CreateDataset :one
-insert into datasets (name, creator_id)
-values ($1, $2)
-returning id;
-
--- name: UpdateAfterUpload :exec
-update datasets
-set status     = $2,
-    version    = $3,
-    rows_count = $4,
-    updated_at = now()
-where id = $1;
-
--- name: UpdateData :exec
-update datasets
-set version    = $2,
-    rows_count = $3,
-    updated_at = now()
-where id = $1;
-
--- name: SetStatus :exec
-update datasets
-set status    = $2,
-    updated_at = now()
-where id = $1;
-
--- name: GetUserDatasets :many
+-- name: GetModels :many
 select id,
        name,
-       version,
-       status,
+       description,
        count(1) over () as count
-from datasets
-where creator_id = $1 and name like $4
+from models
+where name like $1
 order by created_at desc
 limit $2 offset $3;
 
--- name: GetDataset :one
+-- name: GetModel :one
 select id,
        name,
-       version,
-       status,
-       creator_id,
-       created_at,
-       updated_at,
-       rows_count
-from datasets
+       description
+from models
 where id = $1;
 
--- name: GetDatasetCreator :one
-select creator_id
-from datasets
-where id = $1;
+-- name: GetModelProblem :one
+select p.id,
+       p.name,
+       p.description,
+       array_agg(me.id)          as metric_ids,
+       array_agg(me.name)        as metric_names,
+       array_agg(me.description) as metric_descriptions
+from models m
+         join problems p on m.problem_id = p.id
+         join problem_metrics pm on p.id = pm.problem_id
+         join metrics me on pm.metric_id = me.id
+where m.id = $1
+group by (p.id, p.name, p.description);
 
--- name: GetDatasetStatus :one
-select status
-from datasets
-where id = $1;
-
+-- name: GetModelHyperparameters :many
+select h.id,
+       h.name,
+       h.description,
+       h.type,
+       h.default_value
+from models m
+         join hyperparameters h on m.id = h.model_id
+where m.id = $1;

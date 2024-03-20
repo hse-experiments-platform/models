@@ -7,141 +7,63 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createDataset = `-- name: CreateDataset :one
-insert into datasets (name, creator_id)
-values ($1, $2)
-returning id
-`
-
-type CreateDatasetParams struct {
-	Name      string
-	CreatorID int64
-}
-
-func (q *Queries) CreateDataset(ctx context.Context, arg CreateDatasetParams) (int64, error) {
-	row := q.db.QueryRow(ctx, createDataset, arg.Name, arg.CreatorID)
-	var id int64
-	err := row.Scan(&id)
-	return id, err
-}
-
-const getDataset = `-- name: GetDataset :one
+const getModel = `-- name: GetModel :one
 select id,
        name,
-       version,
-       status,
-       creator_id,
-       created_at,
-       updated_at,
-       rows_count
-from datasets
+       description
+from models
 where id = $1
 `
 
-type GetDatasetRow struct {
-	ID        int64
-	Name      string
-	Version   string
-	Status    DatasetStatus
-	CreatorID int64
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	RowsCount int64
+type GetModelRow struct {
+	ID          int64
+	Name        string
+	Description string
 }
 
-func (q *Queries) GetDataset(ctx context.Context, id int64) (GetDatasetRow, error) {
-	row := q.db.QueryRow(ctx, getDataset, id)
-	var i GetDatasetRow
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Version,
-		&i.Status,
-		&i.CreatorID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.RowsCount,
-	)
+func (q *Queries) GetModel(ctx context.Context, id int64) (GetModelRow, error) {
+	row := q.db.QueryRow(ctx, getModel, id)
+	var i GetModelRow
+	err := row.Scan(&i.ID, &i.Name, &i.Description)
 	return i, err
 }
 
-const getDatasetCreator = `-- name: GetDatasetCreator :one
-select creator_id
-from datasets
-where id = $1
+const getModelHyperparameters = `-- name: GetModelHyperparameters :many
+select h.id,
+       h.name,
+       h.description,
+       h.type,
+       h.default_value
+from models m
+         join hyperparameters h on m.id = h.model_id
+where m.id = $1
 `
 
-func (q *Queries) GetDatasetCreator(ctx context.Context, id int64) (int64, error) {
-	row := q.db.QueryRow(ctx, getDatasetCreator, id)
-	var creator_id int64
-	err := row.Scan(&creator_id)
-	return creator_id, err
+type GetModelHyperparametersRow struct {
+	ID           int64
+	Name         string
+	Description  string
+	Type         string
+	DefaultValue []byte
 }
 
-const getDatasetStatus = `-- name: GetDatasetStatus :one
-select status
-from datasets
-where id = $1
-`
-
-func (q *Queries) GetDatasetStatus(ctx context.Context, id int64) (DatasetStatus, error) {
-	row := q.db.QueryRow(ctx, getDatasetStatus, id)
-	var status DatasetStatus
-	err := row.Scan(&status)
-	return status, err
-}
-
-const getUserDatasets = `-- name: GetUserDatasets :many
-select id,
-       name,
-       version,
-       status,
-       count(1) over () as count
-from datasets
-where creator_id = $1 and name like $4
-order by created_at desc
-limit $2 offset $3
-`
-
-type GetUserDatasetsParams struct {
-	CreatorID int64
-	Limit     int64
-	Offset    int64
-	Name      string
-}
-
-type GetUserDatasetsRow struct {
-	ID      int64
-	Name    string
-	Version string
-	Status  DatasetStatus
-	Count   int64
-}
-
-func (q *Queries) GetUserDatasets(ctx context.Context, arg GetUserDatasetsParams) ([]GetUserDatasetsRow, error) {
-	rows, err := q.db.Query(ctx, getUserDatasets,
-		arg.CreatorID,
-		arg.Limit,
-		arg.Offset,
-		arg.Name,
-	)
+func (q *Queries) GetModelHyperparameters(ctx context.Context, id int64) ([]GetModelHyperparametersRow, error) {
+	rows, err := q.db.Query(ctx, getModelHyperparameters, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetUserDatasetsRow
+	var items []GetModelHyperparametersRow
 	for rows.Next() {
-		var i GetUserDatasetsRow
+		var i GetModelHyperparametersRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
-			&i.Version,
-			&i.Status,
-			&i.Count,
+			&i.Description,
+			&i.Type,
+			&i.DefaultValue,
 		); err != nil {
 			return nil, err
 		}
@@ -153,64 +75,89 @@ func (q *Queries) GetUserDatasets(ctx context.Context, arg GetUserDatasetsParams
 	return items, nil
 }
 
-const setStatus = `-- name: SetStatus :exec
-update datasets
-set status    = $2,
-    updated_at = now()
-where id = $1
+const getModelProblem = `-- name: GetModelProblem :one
+select p.id,
+       p.name,
+       p.description,
+       array_agg(me.id)          as metric_ids,
+       array_agg(me.name)        as metric_names,
+       array_agg(me.description) as metric_descriptions
+from models m
+         join problems p on m.problem_id = p.id
+         join problem_metrics pm on p.id = pm.problem_id
+         join metrics me on pm.metric_id = me.id
+where m.id = $1
+group by (p.id, p.name, p.description)
 `
 
-type SetStatusParams struct {
-	ID     int64
-	Status DatasetStatus
+type GetModelProblemRow struct {
+	ID                 int64
+	Name               string
+	Description        string
+	MetricIds          []int64
+	MetricNames        []string
+	MetricDescriptions []string
 }
 
-func (q *Queries) SetStatus(ctx context.Context, arg SetStatusParams) error {
-	_, err := q.db.Exec(ctx, setStatus, arg.ID, arg.Status)
-	return err
-}
-
-const updateAfterUpload = `-- name: UpdateAfterUpload :exec
-update datasets
-set status     = $2,
-    version    = $3,
-    rows_count = $4,
-    updated_at = now()
-where id = $1
-`
-
-type UpdateAfterUploadParams struct {
-	ID        int64
-	Status    DatasetStatus
-	Version   string
-	RowsCount int64
-}
-
-func (q *Queries) UpdateAfterUpload(ctx context.Context, arg UpdateAfterUploadParams) error {
-	_, err := q.db.Exec(ctx, updateAfterUpload,
-		arg.ID,
-		arg.Status,
-		arg.Version,
-		arg.RowsCount,
+func (q *Queries) GetModelProblem(ctx context.Context, id int64) (GetModelProblemRow, error) {
+	row := q.db.QueryRow(ctx, getModelProblem, id)
+	var i GetModelProblemRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.MetricIds,
+		&i.MetricNames,
+		&i.MetricDescriptions,
 	)
-	return err
+	return i, err
 }
 
-const updateData = `-- name: UpdateData :exec
-update datasets
-set version    = $2,
-    rows_count = $3,
-    updated_at = now()
-where id = $1
+const getModels = `-- name: GetModels :many
+select id,
+       name,
+       description,
+       count(1) over () as count
+from models
+where name like $1
+order by created_at desc
+limit $2 offset $3
 `
 
-type UpdateDataParams struct {
-	ID        int64
-	Version   string
-	RowsCount int64
+type GetModelsParams struct {
+	Name   string
+	Limit  int64
+	Offset int64
 }
 
-func (q *Queries) UpdateData(ctx context.Context, arg UpdateDataParams) error {
-	_, err := q.db.Exec(ctx, updateData, arg.ID, arg.Version, arg.RowsCount)
-	return err
+type GetModelsRow struct {
+	ID          int64
+	Name        string
+	Description string
+	Count       int64
+}
+
+func (q *Queries) GetModels(ctx context.Context, arg GetModelsParams) ([]GetModelsRow, error) {
+	rows, err := q.db.Query(ctx, getModels, arg.Name, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetModelsRow
+	for rows.Next() {
+		var i GetModelsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Count,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

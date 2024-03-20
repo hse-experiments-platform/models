@@ -53,7 +53,7 @@ func (m *Hyperparameter) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		copy(dAtA[i:], m.unknownFields)
 	}
 	if m.DefaultValue != nil {
-		size, err := (*structpb.Struct)(m.DefaultValue).MarshalToSizedBufferVT(dAtA[:i])
+		size, err := (*structpb.Value)(m.DefaultValue).MarshalToSizedBufferVT(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -1125,7 +1125,7 @@ func (m *Hyperparameter) SizeVT() (n int) {
 		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
 	if m.DefaultValue != nil {
-		l = (*structpb.Struct)(m.DefaultValue).SizeVT()
+		l = (*structpb.Value)(m.DefaultValue).SizeVT()
 		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
 	n += len(m.unknownFields)
@@ -1707,9 +1707,9 @@ func (m *Hyperparameter) UnmarshalVT(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.DefaultValue == nil {
-				m.DefaultValue = &structpb1.Struct{}
+				m.DefaultValue = &structpb1.Value{}
 			}
-			if err := (*structpb.Struct)(m.DefaultValue).UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			if err := (*structpb.Value)(m.DefaultValue).UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
