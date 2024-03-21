@@ -484,7 +484,7 @@
           "type": "string",
           "format": "uint64"
         },
-        "baseModeName": {
+        "baseModelName": {
           "type": "string"
         },
         "problem": {
@@ -495,12 +495,15 @@
           "format": "uint64"
         },
         "trainDatasetName": {
-          "type": "string",
-          "format": "uint64"
+          "type": "string"
         },
         "createdAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "launchID": {
+          "type": "string",
+          "format": "uint64"
         }
       }
     },
@@ -532,7 +535,7 @@
           "type": "string",
           "format": "uint64"
         },
-        "baseModeName": {
+        "baseModelName": {
           "type": "string"
         },
         "problem": {
@@ -543,8 +546,7 @@
           "format": "uint64"
         },
         "trainDatasetName": {
-          "type": "string",
-          "format": "uint64"
+          "type": "string"
         },
         "createdAt": {
           "type": "string",
@@ -556,8 +558,9 @@
         "schema": {
           "$ref": "#/definitions/modelsDatasetSchema"
         },
-        "trainError": {
-          "type": "string"
+        "launchID": {
+          "type": "string",
+          "format": "uint64"
         }
       }
     },

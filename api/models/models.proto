@@ -179,25 +179,26 @@ message ShortTrainedModel {
   string name = 2;
   TrainStatus trainStatus = 3;
   uint64 baseModelID = 4;
-  string baseModeName = 5;
+  string baseModelName = 5;
   ShortProblem problem = 6;
   uint64 trainDatasetID = 7;
-  uint64 trainDatasetName = 8;
+  string trainDatasetName = 8;
   google.protobuf.Timestamp createdAt = 9;
+  uint64 launchID = 10;
 }
 message TrainedModel {
   uint64 trainedModelID = 1;
   string name = 2;
   TrainStatus trainStatus = 3;
   uint64 baseModelID = 4;
-  string baseModeName = 5;
+  string baseModelName = 5;
   ShortProblem problem = 6;
   uint64 trainDatasetID = 7;
-  uint64 trainDatasetName = 8;
+  string trainDatasetName = 8;
   google.protobuf.Timestamp createdAt = 9;
   string targetColumn = 10;
   DatasetSchema schema = 11;
-  string trainError = 12;
+  uint64 launchID = 12;
 }
 
 message GetTrainedModelsRequest {

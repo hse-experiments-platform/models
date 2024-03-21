@@ -851,6 +851,11 @@ func (m *ShortTrainedModel) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
+	if m.LaunchID != 0 {
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.LaunchID))
+		i--
+		dAtA[i] = 0x50
+	}
 	if m.CreatedAt != nil {
 		size, err := (*timestamppb.Timestamp)(m.CreatedAt).MarshalToSizedBufferVT(dAtA[:i])
 		if err != nil {
@@ -861,10 +866,12 @@ func (m *ShortTrainedModel) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x4a
 	}
-	if m.TrainDatasetName != 0 {
-		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.TrainDatasetName))
+	if len(m.TrainDatasetName) > 0 {
+		i -= len(m.TrainDatasetName)
+		copy(dAtA[i:], m.TrainDatasetName)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.TrainDatasetName)))
 		i--
-		dAtA[i] = 0x40
+		dAtA[i] = 0x42
 	}
 	if m.TrainDatasetID != 0 {
 		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.TrainDatasetID))
@@ -881,10 +888,10 @@ func (m *ShortTrainedModel) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x32
 	}
-	if len(m.BaseModeName) > 0 {
-		i -= len(m.BaseModeName)
-		copy(dAtA[i:], m.BaseModeName)
-		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.BaseModeName)))
+	if len(m.BaseModelName) > 0 {
+		i -= len(m.BaseModelName)
+		copy(dAtA[i:], m.BaseModelName)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.BaseModelName)))
 		i--
 		dAtA[i] = 0x2a
 	}
@@ -943,12 +950,10 @@ func (m *TrainedModel) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
-	if len(m.TrainError) > 0 {
-		i -= len(m.TrainError)
-		copy(dAtA[i:], m.TrainError)
-		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.TrainError)))
+	if m.LaunchID != 0 {
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.LaunchID))
 		i--
-		dAtA[i] = 0x62
+		dAtA[i] = 0x60
 	}
 	if m.Schema != nil {
 		size, err := m.Schema.MarshalToSizedBufferVT(dAtA[:i])
@@ -977,10 +982,12 @@ func (m *TrainedModel) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x4a
 	}
-	if m.TrainDatasetName != 0 {
-		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.TrainDatasetName))
+	if len(m.TrainDatasetName) > 0 {
+		i -= len(m.TrainDatasetName)
+		copy(dAtA[i:], m.TrainDatasetName)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.TrainDatasetName)))
 		i--
-		dAtA[i] = 0x40
+		dAtA[i] = 0x42
 	}
 	if m.TrainDatasetID != 0 {
 		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.TrainDatasetID))
@@ -997,10 +1004,10 @@ func (m *TrainedModel) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x32
 	}
-	if len(m.BaseModeName) > 0 {
-		i -= len(m.BaseModeName)
-		copy(dAtA[i:], m.BaseModeName)
-		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.BaseModeName)))
+	if len(m.BaseModelName) > 0 {
+		i -= len(m.BaseModelName)
+		copy(dAtA[i:], m.BaseModelName)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.BaseModelName)))
 		i--
 		dAtA[i] = 0x2a
 	}
@@ -1552,7 +1559,7 @@ func (m *ShortTrainedModel) SizeVT() (n int) {
 	if m.BaseModelID != 0 {
 		n += 1 + protohelpers.SizeOfVarint(uint64(m.BaseModelID))
 	}
-	l = len(m.BaseModeName)
+	l = len(m.BaseModelName)
 	if l > 0 {
 		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
@@ -1563,12 +1570,16 @@ func (m *ShortTrainedModel) SizeVT() (n int) {
 	if m.TrainDatasetID != 0 {
 		n += 1 + protohelpers.SizeOfVarint(uint64(m.TrainDatasetID))
 	}
-	if m.TrainDatasetName != 0 {
-		n += 1 + protohelpers.SizeOfVarint(uint64(m.TrainDatasetName))
+	l = len(m.TrainDatasetName)
+	if l > 0 {
+		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
 	if m.CreatedAt != nil {
 		l = (*timestamppb.Timestamp)(m.CreatedAt).SizeVT()
 		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+	}
+	if m.LaunchID != 0 {
+		n += 1 + protohelpers.SizeOfVarint(uint64(m.LaunchID))
 	}
 	n += len(m.unknownFields)
 	return n
@@ -1593,7 +1604,7 @@ func (m *TrainedModel) SizeVT() (n int) {
 	if m.BaseModelID != 0 {
 		n += 1 + protohelpers.SizeOfVarint(uint64(m.BaseModelID))
 	}
-	l = len(m.BaseModeName)
+	l = len(m.BaseModelName)
 	if l > 0 {
 		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
@@ -1604,8 +1615,9 @@ func (m *TrainedModel) SizeVT() (n int) {
 	if m.TrainDatasetID != 0 {
 		n += 1 + protohelpers.SizeOfVarint(uint64(m.TrainDatasetID))
 	}
-	if m.TrainDatasetName != 0 {
-		n += 1 + protohelpers.SizeOfVarint(uint64(m.TrainDatasetName))
+	l = len(m.TrainDatasetName)
+	if l > 0 {
+		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
 	if m.CreatedAt != nil {
 		l = (*timestamppb.Timestamp)(m.CreatedAt).SizeVT()
@@ -1619,9 +1631,8 @@ func (m *TrainedModel) SizeVT() (n int) {
 		l = m.Schema.SizeVT()
 		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
-	l = len(m.TrainError)
-	if l > 0 {
-		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+	if m.LaunchID != 0 {
+		n += 1 + protohelpers.SizeOfVarint(uint64(m.LaunchID))
 	}
 	n += len(m.unknownFields)
 	return n
@@ -3761,7 +3772,7 @@ func (m *ShortTrainedModel) UnmarshalVT(dAtA []byte) error {
 			}
 		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field BaseModeName", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field BaseModelName", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -3789,7 +3800,7 @@ func (m *ShortTrainedModel) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.BaseModeName = string(dAtA[iNdEx:postIndex])
+			m.BaseModelName = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
@@ -3847,10 +3858,10 @@ func (m *ShortTrainedModel) UnmarshalVT(dAtA []byte) error {
 				}
 			}
 		case 8:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field TrainDatasetName", wireType)
 			}
-			m.TrainDatasetName = 0
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return protohelpers.ErrIntOverflow
@@ -3860,11 +3871,24 @@ func (m *ShortTrainedModel) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.TrainDatasetName |= uint64(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return protohelpers.ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return protohelpers.ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TrainDatasetName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		case 9:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
@@ -3901,6 +3925,25 @@ func (m *ShortTrainedModel) UnmarshalVT(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 10:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LaunchID", wireType)
+			}
+			m.LaunchID = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protohelpers.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.LaunchID |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := protohelpers.Skip(dAtA[iNdEx:])
@@ -4043,7 +4086,7 @@ func (m *TrainedModel) UnmarshalVT(dAtA []byte) error {
 			}
 		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field BaseModeName", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field BaseModelName", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -4071,7 +4114,7 @@ func (m *TrainedModel) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.BaseModeName = string(dAtA[iNdEx:postIndex])
+			m.BaseModelName = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
@@ -4129,10 +4172,10 @@ func (m *TrainedModel) UnmarshalVT(dAtA []byte) error {
 				}
 			}
 		case 8:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field TrainDatasetName", wireType)
 			}
-			m.TrainDatasetName = 0
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return protohelpers.ErrIntOverflow
@@ -4142,11 +4185,24 @@ func (m *TrainedModel) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.TrainDatasetName |= uint64(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return protohelpers.ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return protohelpers.ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TrainDatasetName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		case 9:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
@@ -4252,10 +4308,10 @@ func (m *TrainedModel) UnmarshalVT(dAtA []byte) error {
 			}
 			iNdEx = postIndex
 		case 12:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TrainError", wireType)
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LaunchID", wireType)
 			}
-			var stringLen uint64
+			m.LaunchID = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return protohelpers.ErrIntOverflow
@@ -4265,24 +4321,11 @@ func (m *TrainedModel) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				m.LaunchID |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return protohelpers.ErrInvalidLength
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return protohelpers.ErrInvalidLength
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TrainError = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := protohelpers.Skip(dAtA[iNdEx:])
