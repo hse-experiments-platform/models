@@ -16,6 +16,7 @@ import (
 	"github.com/hse-experiments-platform/models/internal/app/models"
 	pb "github.com/hse-experiments-platform/models/pkg/models"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog"
@@ -33,17 +34,40 @@ func loadEnv() {
 	}
 }
 
-func initDB(ctx context.Context, dsnOSKey string) *pgx.Conn {
-	c, err := pgx.Connect(ctx, osinit.MustLoadEnv(dsnOSKey))
+func initDB(ctx context.Context, dsnOSKey string, loadTypes ...string) *pgxpool.Pool {
+	config, err := pgxpool.ParseConfig(osinit.MustLoadEnv(dsnOSKey))
+	if err != nil {
+		log.Fatal().Err(err).Msg("cannot parse config")
+	}
+
+	config.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
+		for _, loadType := range loadTypes {
+			t, err := conn.LoadType(context.Background(), loadType) // type
+			if err != nil {
+				log.Fatal().Err(err).Msg("cannot load type")
+			}
+			conn.TypeMap().RegisterType(t)
+
+			t, err = conn.LoadType(context.Background(), "_"+loadType) // array of type
+			if err != nil {
+				log.Fatal().Err(err).Msg("cannot load type")
+			}
+			conn.TypeMap().RegisterType(t)
+		}
+
+		return nil
+	}
+
+	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		log.Fatal().Err(err).Str("dsn", osinit.MustLoadEnv(dsnOSKey)).Msg("cannot osinit db")
 	}
 
-	if err = c.Ping(ctx); err != nil {
+	if err = pool.Ping(ctx); err != nil {
 		log.Fatal().Err(err).Msg("cannot connect to db")
 	}
 
-	return c
+	return pool
 }
 
 func initService(ctx context.Context, maker token.Maker) pb.ModelsServiceServer {

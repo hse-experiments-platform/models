@@ -6,7 +6,7 @@ import (
 	"github.com/hse-experiments-platform/library/pkg/utils/token"
 	"github.com/hse-experiments-platform/models/internal/pkg/storage/db"
 	pb "github.com/hse-experiments-platform/models/pkg/models"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -16,13 +16,13 @@ var _ pb.ModelsServiceServer = (*modelsService)(nil)
 
 type modelsService struct {
 	pb.UnimplementedModelsServiceServer
-	commonDBConn *pgx.Conn
+	commonDBConn *pgxpool.Pool
 	maker        token.Maker
 
 	commonDB *db.Queries
 }
 
-func NewService(commonDBConn *pgx.Conn, maker token.Maker) *modelsService {
+func NewService(commonDBConn *pgxpool.Pool, maker token.Maker) *modelsService {
 	return &modelsService{
 		commonDBConn: commonDBConn,
 		maker:        maker,
