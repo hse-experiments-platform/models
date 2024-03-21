@@ -180,7 +180,7 @@ message ShortTrainedModel {
   TrainStatus trainStatus = 3;
   uint64 baseModelID = 4;
   string baseModelName = 5;
-  ShortProblem problem = 6;
+  string problemName = 6;
   uint64 trainDatasetID = 7;
   string trainDatasetName = 8;
   google.protobuf.Timestamp createdAt = 9;

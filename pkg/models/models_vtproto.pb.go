@@ -878,13 +878,10 @@ func (m *ShortTrainedModel) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x38
 	}
-	if m.Problem != nil {
-		size, err := m.Problem.MarshalToSizedBufferVT(dAtA[:i])
-		if err != nil {
-			return 0, err
-		}
-		i -= size
-		i = protohelpers.EncodeVarint(dAtA, i, uint64(size))
+	if len(m.ProblemName) > 0 {
+		i -= len(m.ProblemName)
+		copy(dAtA[i:], m.ProblemName)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.ProblemName)))
 		i--
 		dAtA[i] = 0x32
 	}
@@ -1563,8 +1560,8 @@ func (m *ShortTrainedModel) SizeVT() (n int) {
 	if l > 0 {
 		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
-	if m.Problem != nil {
-		l = m.Problem.SizeVT()
+	l = len(m.ProblemName)
+	if l > 0 {
 		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
 	if m.TrainDatasetID != 0 {
@@ -3804,9 +3801,9 @@ func (m *ShortTrainedModel) UnmarshalVT(dAtA []byte) error {
 			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Problem", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ProblemName", wireType)
 			}
-			var msglen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return protohelpers.ErrIntOverflow
@@ -3816,27 +3813,23 @@ func (m *ShortTrainedModel) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return protohelpers.ErrInvalidLength
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return protohelpers.ErrInvalidLength
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Problem == nil {
-				m.Problem = &ShortProblem{}
-			}
-			if err := m.Problem.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
+			m.ProblemName = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 7:
 			if wireType != 0 {
