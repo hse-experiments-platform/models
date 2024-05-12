@@ -11,6 +11,133 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createHyperparameters = `-- name: CreateHyperparameters :exec
+insert into hyperparameters (name, description, type, default_value, model_id)
+select unnest($1::text[]),
+       unnest($2::text[]),
+       unnest($3::text[]),
+       unnest($4::text[]),
+       $5
+`
+
+type CreateHyperparametersParams struct {
+	Names         []string
+	Descriptions  []string
+	Types         []string
+	DefaultValues []string
+	ModelID       pgtype.Int8
+}
+
+func (q *Queries) CreateHyperparameters(ctx context.Context, arg CreateHyperparametersParams) error {
+	_, err := q.db.Exec(ctx, createHyperparameters,
+		arg.Names,
+		arg.Descriptions,
+		arg.Types,
+		arg.DefaultValues,
+		arg.ModelID,
+	)
+	return err
+}
+
+const createModel = `-- name: CreateModel :one
+insert into models (name, description, problem_id)
+values ($1, $2, (select id from problems where name = $3))
+returning id
+`
+
+type CreateModelParams struct {
+	Name        pgtype.Text
+	Description pgtype.Text
+	Problem     pgtype.Text
+}
+
+func (q *Queries) CreateModel(ctx context.Context, arg CreateModelParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createModel, arg.Name, arg.Description, arg.Problem)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
+const createModelMetrics = `-- name: CreateModelMetrics :exec
+insert into metrics (metric_name, model_id)
+select unnest($1::text[]), $2
+`
+
+type CreateModelMetricsParams struct {
+	MetricNames []string
+	ModelID     int64
+}
+
+func (q *Queries) CreateModelMetrics(ctx context.Context, arg CreateModelMetricsParams) error {
+	_, err := q.db.Exec(ctx, createModelMetrics, arg.MetricNames, arg.ModelID)
+	return err
+}
+
+const getAllModels = `-- name: GetAllModels :many
+select m.id,
+       m.name,
+       m.description,
+       p.name                                         as problem_name,
+       array_remove(h.name, null)          as hyperparameter_names,
+       array_remove(h.description, null)   as hyperparameter_descriptions,
+       array_remove(h.type, null)          as hyperparameter_types,
+       array_remove(h.default_value, null) as hyperparameter_default_values,
+       array_remove(m2.metric_name, null)  as metric_names
+from models m
+         join problems p on m.problem_id = p.id
+         cross join lateral (select array_agg(h.name)          as name,
+                                    array_agg(h.description)   as description,
+                                    array_agg(h.type)          as "type",
+                                    array_agg(h.default_value) as default_value
+                             from hyperparameters h
+                             where m.id = h.model_id) as h
+         cross join lateral (select array_agg(m2.metric_name)          as metric_name
+                             from metrics m2
+                             where m.id = m2.model_id) as m2
+`
+
+type GetAllModelsRow struct {
+	ID                          int64
+	Name                        string
+	Description                 string
+	ProblemName                 string
+	HyperparameterNames         []string
+	HyperparameterDescriptions  []string
+	HyperparameterTypes         []string
+	HyperparameterDefaultValues []string
+	MetricNames                 []string
+}
+
+func (q *Queries) GetAllModels(ctx context.Context) ([]GetAllModelsRow, error) {
+	rows, err := q.db.Query(ctx, getAllModels)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllModelsRow
+	for rows.Next() {
+		var i GetAllModelsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.ProblemName,
+			&i.HyperparameterNames,
+			&i.HyperparameterDescriptions,
+			&i.HyperparameterTypes,
+			&i.HyperparameterDefaultValues,
+			&i.MetricNames,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getModel = `-- name: GetModel :one
 select id,
        name,
@@ -48,7 +175,7 @@ type GetModelHyperparametersRow struct {
 	Name         string
 	Description  string
 	Type         string
-	DefaultValue []byte
+	DefaultValue string
 }
 
 func (q *Queries) GetModelHyperparameters(ctx context.Context, id int64) ([]GetModelHyperparametersRow, error) {
@@ -82,23 +209,20 @@ select p.id,
        p.name,
        p.description,
        array_agg(me.id)          as metric_ids,
-       array_agg(me.name)        as metric_names,
-       array_agg(me.description) as metric_descriptions
+       array_agg(me.metric_name) as metric_names
 from models m
          join problems p on m.problem_id = p.id
-         join problem_metrics pm on p.id = pm.problem_id
-         join metrics me on pm.metric_id = me.id
+         join metrics me on m.id = me.model_id
 where m.id = $1
 group by (p.id, p.name, p.description)
 `
 
 type GetModelProblemRow struct {
-	ID                 int64
-	Name               string
-	Description        string
-	MetricIds          []int64
-	MetricNames        []string
-	MetricDescriptions []string
+	ID          int64
+	Name        string
+	Description string
+	MetricIds   []int64
+	MetricNames []string
 }
 
 func (q *Queries) GetModelProblem(ctx context.Context, id int64) (GetModelProblemRow, error) {
@@ -110,7 +234,6 @@ func (q *Queries) GetModelProblem(ctx context.Context, id int64) (GetModelProble
 		&i.Description,
 		&i.MetricIds,
 		&i.MetricNames,
-		&i.MetricDescriptions,
 	)
 	return i, err
 }
@@ -286,14 +409,14 @@ select tm.id,
        tm.name,
        tm.description,
        tm.model_training_status,
-       m.id             as model_id,
-       m.name           as model_name,
-       p.name           as problem_name,
+       m.id                   as model_id,
+       m.name                 as model_name,
+       p.name                 as problem_name,
        tm.training_dataset_id as training_dataset_id,
-       d.name           as training_dataset_name,
+       d.name                 as training_dataset_name,
        tm.created_at,
        tm.launch_id,
-       count(1) over () as count
+       count(1) over ()       as count
 from trained_models tm
          join models m on tm.model_id = m.id
          join problems p on m.problem_id = p.id

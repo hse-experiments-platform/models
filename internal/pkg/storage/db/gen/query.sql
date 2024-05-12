@@ -21,12 +21,10 @@ select p.id,
        p.name,
        p.description,
        array_agg(me.id)          as metric_ids,
-       array_agg(me.name)        as metric_names,
-       array_agg(me.description) as metric_descriptions
+       array_agg(me.metric_name) as metric_names
 from models m
          join problems p on m.problem_id = p.id
-         join problem_metrics pm on p.id = pm.problem_id
-         join metrics me on pm.metric_id = me.id
+         join metrics me on m.id = me.model_id
 where m.id = $1
 group by (p.id, p.name, p.description);
 
@@ -55,14 +53,14 @@ select tm.id,
        tm.name,
        tm.description,
        tm.model_training_status,
-       m.id             as model_id,
-       m.name           as model_name,
-       p.name           as problem_name,
+       m.id                   as model_id,
+       m.name                 as model_name,
+       p.name                 as problem_name,
        tm.training_dataset_id as training_dataset_id,
-       d.name           as training_dataset_name,
+       d.name                 as training_dataset_name,
        tm.created_at,
        tm.launch_id,
-       count(1) over () as count
+       count(1) over ()       as count
 from trained_models tm
          join models m on tm.model_id = m.id
          join problems p on m.problem_id = p.id
@@ -92,3 +90,42 @@ from trained_models tm
          join problems p on m.problem_id = p.id
          join datasets d on d.id = tm.training_dataset_id
 where tm.id = $1;
+
+-- name: GetAllModels :many
+select m.id,
+       m.name,
+       m.description,
+       p.name                                         as problem_name,
+       array_remove(h.name, null)          as hyperparameter_names,
+       array_remove(h.description, null)   as hyperparameter_descriptions,
+       array_remove(h.type, null)          as hyperparameter_types,
+       array_remove(h.default_value, null) as hyperparameter_default_values,
+       array_remove(m2.metric_name, null)  as metric_names
+from models m
+         join problems p on m.problem_id = p.id
+         cross join lateral (select array_agg(h.name)          as name,
+                                    array_agg(h.description)   as description,
+                                    array_agg(h.type)          as "type",
+                                    array_agg(h.default_value) as default_value
+                             from hyperparameters h
+                             where m.id = h.model_id) as h
+         cross join lateral (select array_agg(m2.metric_name)          as metric_name
+                             from metrics m2
+                             where m.id = m2.model_id) as m2;
+
+-- name: CreateModel :one
+insert into models (name, description, problem_id)
+values (sqlc.arg(name), sqlc.arg(description), (select id from problems where name = sqlc.arg(problem)))
+returning id;
+
+-- name: CreateHyperparameters :exec
+insert into hyperparameters (name, description, type, default_value, model_id)
+select unnest(sqlc.arg(names)::text[]),
+       unnest(sqlc.arg(descriptions)::text[]),
+       unnest(sqlc.arg(types)::text[]),
+       unnest(sqlc.arg(default_values)::text[]),
+       $5;
+
+-- name: CreateModelMetrics :exec
+insert into metrics (metric_name, model_id)
+select unnest(sqlc.arg(metric_names)::text[]), $2;

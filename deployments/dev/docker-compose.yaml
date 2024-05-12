@@ -10,6 +10,7 @@ services:
     environment:
       - DOTENV_FILE=configs/dev/.env
       - DB_CONNECT_STRING=postgresql://hseuser:P@ssw0rd@db:5432/hsedb
+      - MODELS_PATH=models-storage/
     ports:
       - "8085:8085"
       - "8086:8086"

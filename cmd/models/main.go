@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -75,6 +74,11 @@ func initService(ctx context.Context, maker token.Maker) pb.ModelsServiceServer 
 		initDB(ctx, "DB_CONNECT_STRING"),
 		maker,
 	)
+
+	err := service.InitModels(ctx, osinit.MustLoadEnv("MODELS_PATH"))
+	if err != nil {
+		log.Fatal().Err(err).Msg("cannot init models")
+	}
 
 	return service
 }
@@ -169,6 +173,7 @@ func run(context.Context) {
 
 	maker, err := token.NewMaker(osinit.MustLoadEnv("CIPHER_KEY"))
 	if err != nil {
+
 		log.Fatal().Err(err).Msg("cannot osinit token maker")
 	}
 	service := initService(ctx, maker)
@@ -191,7 +196,7 @@ func run(context.Context) {
 func main() {
 	ctx := context.Background()
 
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.DateTime})
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr}) // TimeFormat: time.Un.DateTime})
 
 	loadEnv()
 

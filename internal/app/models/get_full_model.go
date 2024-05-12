@@ -35,7 +35,7 @@ func (s *modelsService) GetFullModel(ctx context.Context, req *pb.GetFullModelRe
 		pr, err := txdb.GetModelProblem(ctx, modelID)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return status.Error(codes.NotFound, fmt.Sprintf("problem for model with id %v not found", modelID))
-		} else if len(pr.MetricIds) != len(pr.MetricDescriptions) || len(pr.MetricDescriptions) != len(pr.MetricNames) {
+		} else if len(pr.MetricIds) != len(pr.MetricNames) {
 			return status.Errorf(codes.Internal, "invalid arrays len in problem with id %v", pr.ID)
 		} else if err != nil {
 			return fmt.Errorf("txdb.GetModelProblem: %w", err)
@@ -84,9 +84,8 @@ func convertProblem(p db.GetModelProblemRow) *pb.Problem {
 
 	for i, _ := range p.MetricIds {
 		resp.Metrics = append(resp.Metrics, &pb.Metric{
-			Id:          uint64(p.MetricIds[i]),
-			Name:        p.MetricNames[i],
-			Description: p.MetricDescriptions[i],
+			Id:   uint64(p.MetricIds[i]),
+			Name: p.MetricNames[i],
 		})
 	}
 

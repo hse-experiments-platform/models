@@ -10,6 +10,8 @@ FROM alpine:latest
 
 WORKDIR /build
 
+RUN git clone https://github.com/hse-experiments-platform/models-storage
+
 COPY configs /build/configs
 COPY swagger /build/swagger
 COPY --from=builder /build/bin/models /build/bin/models

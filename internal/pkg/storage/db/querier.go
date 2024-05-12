@@ -9,6 +9,10 @@ import (
 )
 
 type Querier interface {
+	CreateHyperparameters(ctx context.Context, arg CreateHyperparametersParams) error
+	CreateModel(ctx context.Context, arg CreateModelParams) (int64, error)
+	CreateModelMetrics(ctx context.Context, arg CreateModelMetricsParams) error
+	GetAllModels(ctx context.Context) ([]GetAllModelsRow, error)
 	GetModel(ctx context.Context, id int64) (GetModelRow, error)
 	GetModelHyperparameters(ctx context.Context, id int64) ([]GetModelHyperparametersRow, error)
 	GetModelProblem(ctx context.Context, id int64) (GetModelProblemRow, error)

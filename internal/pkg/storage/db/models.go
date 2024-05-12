@@ -14,10 +14,14 @@ import (
 type DatasetStatus string
 
 const (
-	DatasetStatusInitializing DatasetStatus = "initializing"
-	DatasetStatusLoading      DatasetStatus = "loading"
-	DatasetStatusReady        DatasetStatus = "ready"
-	DatasetStatusError        DatasetStatus = "error"
+	DatasetStatusValue0                 DatasetStatus = ""
+	DatasetStatusInitializing           DatasetStatus = "initializing"
+	DatasetStatusLoading                DatasetStatus = "loading"
+	DatasetStatusWaitsConvertation      DatasetStatus = "waits_convertation"
+	DatasetStatusLoadingError           DatasetStatus = "loading_error"
+	DatasetStatusConvertationInProgress DatasetStatus = "convertation_in_progress"
+	DatasetStatusConvertationError      DatasetStatus = "convertation_error"
+	DatasetStatusReady                  DatasetStatus = "ready"
 )
 
 func (e *DatasetStatus) Scan(src interface{}) error {
@@ -166,7 +170,7 @@ type Hyperparameter struct {
 	Name         string
 	Description  string
 	Type         string
-	DefaultValue []byte
+	DefaultValue string
 	ModelID      pgtype.Int8
 	CreatedAt    pgtype.Timestamptz
 	UpdatedAt    pgtype.Timestamptz
@@ -184,11 +188,11 @@ type Launch struct {
 }
 
 type Metric struct {
-	ID          int64
-	Name        string
-	Description string
-	CreatedAt   pgtype.Timestamptz
-	UpdatedAt   pgtype.Timestamptz
+	ID         int64
+	ModelID    int64
+	MetricName string
+	CreatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamp
 }
 
 type Model struct {
@@ -216,9 +220,10 @@ type Problem struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
-type ProblemMetric struct {
-	ProblemID int64
-	MetricID  int64
+type TrainHyperparameter struct {
+	TrainModelID     int64
+	HyperparameterID int64
+	Value            string
 }
 
 type TrainMetric struct {
