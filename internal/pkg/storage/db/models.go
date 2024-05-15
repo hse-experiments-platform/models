@@ -59,93 +59,6 @@ func (ns NullDatasetStatus) Value() (driver.Value, error) {
 	return string(ns.DatasetStatus), nil
 }
 
-type LaunchType string
-
-const (
-	LaunchTypeTrain   LaunchType = "train"
-	LaunchTypePredict LaunchType = "predict"
-	LaunchTypeGeneric LaunchType = "generic"
-)
-
-func (e *LaunchType) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = LaunchType(s)
-	case string:
-		*e = LaunchType(s)
-	default:
-		return fmt.Errorf("unsupported scan type for LaunchType: %T", src)
-	}
-	return nil
-}
-
-type NullLaunchType struct {
-	LaunchType LaunchType
-	Valid      bool // Valid is true if LaunchType is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullLaunchType) Scan(value interface{}) error {
-	if value == nil {
-		ns.LaunchType, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.LaunchType.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullLaunchType) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.LaunchType), nil
-}
-
-type ModelTrainingStatus string
-
-const (
-	ModelTrainingStatusNotStarted ModelTrainingStatus = "not_started"
-	ModelTrainingStatusInProgress ModelTrainingStatus = "in_progress"
-	ModelTrainingStatusError      ModelTrainingStatus = "error"
-	ModelTrainingStatusDone       ModelTrainingStatus = "done"
-)
-
-func (e *ModelTrainingStatus) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = ModelTrainingStatus(s)
-	case string:
-		*e = ModelTrainingStatus(s)
-	default:
-		return fmt.Errorf("unsupported scan type for ModelTrainingStatus: %T", src)
-	}
-	return nil
-}
-
-type NullModelTrainingStatus struct {
-	ModelTrainingStatus ModelTrainingStatus
-	Valid               bool // Valid is true if ModelTrainingStatus is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullModelTrainingStatus) Scan(value interface{}) error {
-	if value == nil {
-		ns.ModelTrainingStatus, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.ModelTrainingStatus.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullModelTrainingStatus) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.ModelTrainingStatus), nil
-}
-
 type Dataset struct {
 	ID          int64
 	Name        string
@@ -177,14 +90,18 @@ type Hyperparameter struct {
 }
 
 type Launch struct {
-	ID          int64
-	LaunchType  LaunchType
-	Name        string
-	Description string
-	CreatedAt   pgtype.Timestamptz
-	UpdatedAt   pgtype.Timestamptz
-	FinishedAt  pgtype.Timestamptz
-	LaunchError pgtype.Text
+	ID           int64
+	LaunchType   string
+	UserID       int64
+	Name         string
+	Description  string
+	CreatedAt    pgtype.Timestamptz
+	UpdatedAt    pgtype.Timestamptz
+	FinishedAt   pgtype.Timestamptz
+	LaunchStatus string
+	LaunchError  pgtype.Text
+	Input        []byte
+	Output       []byte
 }
 
 type Metric struct {
@@ -202,14 +119,7 @@ type Model struct {
 	ProblemID   int64
 	CreatedAt   pgtype.Timestamptz
 	UpdatedAt   pgtype.Timestamptz
-}
-
-type PredictResult struct {
-	LaunchID        int64
-	TrainedModelID  int64
-	InputDatasetID  int64
-	Status          DatasetStatus
-	OutputDatasetID int64
+	ClassName   pgtype.Text
 }
 
 type Problem struct {
@@ -220,31 +130,16 @@ type Problem struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
-type TrainHyperparameter struct {
-	TrainModelID     int64
-	HyperparameterID int64
-	Value            string
-}
-
-type TrainMetric struct {
-	LaunchID       int64
-	TrainedModelID int64
-	MetricID       int64
-	Value          []byte
-}
-
 type TrainedModel struct {
-	ID                  int64
-	Name                string
-	Description         string
-	ModelID             int64
-	ModelTrainingStatus ModelTrainingStatus
-	TrainingDatasetID   int64
-	TargetColumn        string
-	TrainError          pgtype.Text
-	CreatedAt           pgtype.Timestamptz
-	UpdatedAt           pgtype.Timestamptz
-	LaunchID            int64
+	ID             int64
+	Name           string
+	Description    string
+	BaseModelID    int64
+	TrainDatasetID int64
+	LaunchID       pgtype.Int8
+	TargetCol      string
+	CreatedAt      pgtype.Timestamptz
+	UpdatedAt      pgtype.Timestamptz
 }
 
 type User struct {

@@ -40,8 +40,8 @@ func (q *Queries) CreateHyperparameters(ctx context.Context, arg CreateHyperpara
 }
 
 const createModel = `-- name: CreateModel :one
-insert into models (name, description, problem_id)
-values ($1, $2, (select id from problems where name = $3))
+insert into models (name, description, problem_id, class_name)
+values ($1, $2, (select id from problems where name = $3), $4)
 returning id
 `
 
@@ -49,10 +49,16 @@ type CreateModelParams struct {
 	Name        pgtype.Text
 	Description pgtype.Text
 	Problem     pgtype.Text
+	ClassName   pgtype.Text
 }
 
 func (q *Queries) CreateModel(ctx context.Context, arg CreateModelParams) (int64, error) {
-	row := q.db.QueryRow(ctx, createModel, arg.Name, arg.Description, arg.Problem)
+	row := q.db.QueryRow(ctx, createModel,
+		arg.Name,
+		arg.Description,
+		arg.Problem,
+		arg.ClassName,
+	)
 	var id int64
 	err := row.Scan(&id)
 	return id, err
@@ -77,7 +83,8 @@ const getAllModels = `-- name: GetAllModels :many
 select m.id,
        m.name,
        m.description,
-       p.name                                         as problem_name,
+       p.name                              as problem_name,
+       m.class_name,
        array_remove(h.name, null)          as hyperparameter_names,
        array_remove(h.description, null)   as hyperparameter_descriptions,
        array_remove(h.type, null)          as hyperparameter_types,
@@ -91,7 +98,7 @@ from models m
                                     array_agg(h.default_value) as default_value
                              from hyperparameters h
                              where m.id = h.model_id) as h
-         cross join lateral (select array_agg(m2.metric_name)          as metric_name
+         cross join lateral (select array_agg(m2.metric_name) as metric_name
                              from metrics m2
                              where m.id = m2.model_id) as m2
 `
@@ -101,6 +108,7 @@ type GetAllModelsRow struct {
 	Name                        string
 	Description                 string
 	ProblemName                 string
+	ClassName                   pgtype.Text
 	HyperparameterNames         []string
 	HyperparameterDescriptions  []string
 	HyperparameterTypes         []string
@@ -122,6 +130,7 @@ func (q *Queries) GetAllModels(ctx context.Context) ([]GetAllModelsRow, error) {
 			&i.Name,
 			&i.Description,
 			&i.ProblemName,
+			&i.ClassName,
 			&i.HyperparameterNames,
 			&i.HyperparameterDescriptions,
 			&i.HyperparameterTypes,
@@ -347,21 +356,22 @@ const getTrainedModel = `-- name: GetTrainedModel :one
 select tm.id,
        tm.name,
        tm.description,
-       tm.model_training_status,
+       l.launch_status,
        m.id          as model_id,
        m.name        as model_name,
        p.id          as problem_id,
        p.description as problem_description,
        p.name        as problem_name,
-       tm.training_dataset_id,
+       tm.train_dataset_id,
        d.name        as training_dataset_name,
        tm.created_at,
        tm.launch_id,
        tm.target_column
 from trained_models tm
-         join models m on tm.model_id = m.id
+         join models m on tm.base_model_id = m.id
          join problems p on m.problem_id = p.id
-         join datasets d on d.id = tm.training_dataset_id
+         join datasets d on d.id = tm.train_dataset_id
+         join launches l on tm.launch_id = l.id
 where tm.id = $1
 `
 
@@ -369,16 +379,16 @@ type GetTrainedModelRow struct {
 	ID                  int64
 	Name                string
 	Description         string
-	ModelTrainingStatus ModelTrainingStatus
+	LaunchStatus        string
 	ModelID             int64
 	ModelName           string
 	ProblemID           int64
 	ProblemDescription  string
 	ProblemName         string
-	TrainingDatasetID   int64
+	TrainDatasetID      int64
 	TrainingDatasetName string
 	CreatedAt           pgtype.Timestamptz
-	LaunchID            int64
+	LaunchID            pgtype.Int8
 	TargetColumn        string
 }
 
@@ -389,13 +399,13 @@ func (q *Queries) GetTrainedModel(ctx context.Context, id int64) (GetTrainedMode
 		&i.ID,
 		&i.Name,
 		&i.Description,
-		&i.ModelTrainingStatus,
+		&i.LaunchStatus,
 		&i.ModelID,
 		&i.ModelName,
 		&i.ProblemID,
 		&i.ProblemDescription,
 		&i.ProblemName,
-		&i.TrainingDatasetID,
+		&i.TrainDatasetID,
 		&i.TrainingDatasetName,
 		&i.CreatedAt,
 		&i.LaunchID,
@@ -404,25 +414,40 @@ func (q *Queries) GetTrainedModel(ctx context.Context, id int64) (GetTrainedMode
 	return i, err
 }
 
+const getTrainedModelRunID = `-- name: GetTrainedModelRunID :one
+select output
+from trained_models tm
+         join launches l on tm.launch_id = l.id
+where tm.id = $1
+`
+
+func (q *Queries) GetTrainedModelRunID(ctx context.Context, trainedModelID int64) ([]byte, error) {
+	row := q.db.QueryRow(ctx, getTrainedModelRunID, trainedModelID)
+	var output []byte
+	err := row.Scan(&output)
+	return output, err
+}
+
 const getTrainedModels = `-- name: GetTrainedModels :many
 select tm.id,
        tm.name,
        tm.description,
-       tm.model_training_status,
-       m.id                   as model_id,
-       m.name                 as model_name,
-       p.name                 as problem_name,
-       tm.training_dataset_id as training_dataset_id,
-       d.name                 as training_dataset_name,
+       l.launch_status,
+       m.id                as model_id,
+       m.name              as model_name,
+       p.name              as problem_name,
+       tm.train_dataset_id as training_dataset_id,
+       d.name              as training_dataset_name,
        tm.created_at,
        tm.launch_id,
-       count(1) over ()       as count
+       count(1) over ()    as count
 from trained_models tm
-         join models m on tm.model_id = m.id
+         join models m on tm.base_model_id = m.id
          join problems p on m.problem_id = p.id
-         join datasets d on d.id = tm.training_dataset_id
+         join datasets d on d.id = tm.train_dataset_id
+         join launches l on tm.launch_id = l.id
 where tm.name like $1
-  and (tm.model_id = $4 or $4 = 0)
+  and (tm.base_model_id = $4 or $4 = 0)
 order by created_at desc
 limit $2 offset $3
 `
@@ -438,14 +463,14 @@ type GetTrainedModelsRow struct {
 	ID                  int64
 	Name                string
 	Description         string
-	ModelTrainingStatus ModelTrainingStatus
+	LaunchStatus        string
 	ModelID             int64
 	ModelName           string
 	ProblemName         string
 	TrainingDatasetID   int64
 	TrainingDatasetName string
 	CreatedAt           pgtype.Timestamptz
-	LaunchID            int64
+	LaunchID            pgtype.Int8
 	Count               pgtype.Int8
 }
 
@@ -467,7 +492,7 @@ func (q *Queries) GetTrainedModels(ctx context.Context, arg GetTrainedModelsPara
 			&i.ID,
 			&i.Name,
 			&i.Description,
-			&i.ModelTrainingStatus,
+			&i.LaunchStatus,
 			&i.ModelID,
 			&i.ModelName,
 			&i.ProblemName,

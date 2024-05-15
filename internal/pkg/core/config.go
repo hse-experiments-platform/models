@@ -15,6 +15,7 @@ import (
 
 type ModelConfig struct {
 	ModelName            string           `yaml:"model_name"`
+	ClassName            string           `yaml:"class_name"`
 	ModelDescription     string           `yaml:"model_description"`
 	Problem              string           `yaml:"problem"`
 	TrainMetrics         []string         `yaml:"train_metrics"`

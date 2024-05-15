@@ -79,6 +79,22 @@ service ModelsService {
       security: {security_requirement: {key: "AccessToken";value: {}}}
     };
   };
+  rpc GetTrainMetrics(GetTrainMetricsRequest) returns (GetTrainMetricsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/trained/{trainedModelID}/metrics"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      security: {security_requirement: {key: "AccessToken";value: {}}}
+    };
+  };
+  rpc GetTrainCharts(GetTrainChartsRequest) returns (GetTrainChartsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/trained/{trainedModelID}/charts"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      security: {security_requirement: {key: "AccessToken";value: {}}}
+    };
+  };
 }
 
 message Hyperparameter {
@@ -135,7 +151,7 @@ message GetProblemsRequest {
 }
 
 message GetProblemsResponse {
- repeated ShortProblem problems = 1;
+  repeated ShortProblem problems = 1;
   PageInfo pageInfo = 2;
 }
 
@@ -166,18 +182,18 @@ message DatasetSchema {
   repeated SchemaColumn columns = 1;
 }
 
-enum TrainStatus {
-  TrainStatusUnknown = 0;
-  TrainStatusNotStarted = 1;
-  TrainStatusInProgress = 2;
-  TrainStatusError = 3;
-  TrainStatusDone = 4;
+enum LaunchStatus {
+  LaunchStatusUnknown = 0;
+  LaunchStatusNotStarted = 1;
+  LaunchStatusInProgress = 2;
+  LaunchStatusError = 3;
+  LaunchStatusSuccess = 4;
 }
 
 message ShortTrainedModel {
   uint64 trainedModelID = 1;
   string name = 2;
-  TrainStatus trainStatus = 3;
+  LaunchStatus trainStatus = 3;
   uint64 baseModelID = 4;
   string baseModelName = 5;
   string problemName = 6;
@@ -189,7 +205,7 @@ message ShortTrainedModel {
 message TrainedModel {
   uint64 trainedModelID = 1;
   string name = 2;
-  TrainStatus trainStatus = 3;
+  LaunchStatus trainStatus = 3;
   uint64 baseModelID = 4;
   string baseModelName = 5;
   ShortProblem problem = 6;
@@ -219,3 +235,24 @@ message GetFullTrainedModelResponse {
   TrainedModel model = 1;
 }
 
+message GetTrainMetricsRequest {
+  uint64 trainedModelID = 1;
+}
+
+message CVMetrics {
+  map<string, double> metrics = 1;
+
+}
+
+message GetTrainMetricsResponse {
+  map<string, double> metrics = 1;
+  repeated CVMetrics cvMetrics = 2;
+}
+
+message GetTrainChartsRequest {
+  uint64 trainedModelID = 1;
+}
+
+message GetTrainChartsResponse {
+  map<string, string> cvChartsUrls = 1;
+}

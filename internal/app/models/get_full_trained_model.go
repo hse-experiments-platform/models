@@ -27,7 +27,7 @@ func (s *modelsService) GetFullTrainedModel(ctx context.Context, req *pb.GetFull
 	resp.Model = &pb.TrainedModel{
 		TrainedModelID: uint64(model.ID),
 		Name:           model.Name,
-		TrainStatus:    convertTrainingStatus(model.ModelTrainingStatus),
+		TrainStatus:    convertTrainingStatus(model.LaunchStatus),
 		BaseModelID:    uint64(model.ModelID),
 		BaseModelName:  model.ModelName,
 		Problem: &pb.ShortProblem{
@@ -35,11 +35,11 @@ func (s *modelsService) GetFullTrainedModel(ctx context.Context, req *pb.GetFull
 			Name:        model.ProblemName,
 			Description: model.ProblemDescription,
 		},
-		TrainDatasetID:   uint64(model.TrainingDatasetID),
+		TrainDatasetID:   uint64(model.TrainDatasetID),
 		TrainDatasetName: model.TrainingDatasetName,
 		CreatedAt:        timestamppb.New(model.CreatedAt.Time),
 		TargetColumn:     model.TargetColumn,
-		LaunchID:         uint64(model.LaunchID),
+		LaunchID:         uint64(model.LaunchID.Int64),
 	}
 
 	return resp, nil

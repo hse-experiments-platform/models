@@ -5,6 +5,7 @@ import (
 
 	"github.com/hse-experiments-platform/library/pkg/utils/token"
 	"github.com/hse-experiments-platform/models/internal/pkg/storage/db"
+	"github.com/hse-experiments-platform/models/internal/pkg/storage/mlflowdb"
 	pb "github.com/hse-experiments-platform/models/pkg/models"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
@@ -17,17 +18,20 @@ var _ pb.ModelsServiceServer = (*modelsService)(nil)
 type modelsService struct {
 	pb.UnimplementedModelsServiceServer
 	commonDBConn *pgxpool.Pool
+	mlflowDBConn *pgxpool.Pool
 	maker        token.Maker
 
 	commonDB *db.Queries
+	mlflowDB *mlflowdb.Queries
 }
 
-func NewService(commonDBConn *pgxpool.Pool, maker token.Maker) *modelsService {
+func NewService(commonDBConn *pgxpool.Pool, mlflowDB *pgxpool.Pool, maker token.Maker) *modelsService {
 	return &modelsService{
 		commonDBConn: commonDBConn,
 		maker:        maker,
 
 		commonDB: db.New(commonDBConn),
+		mlflowDB: mlflowdb.New(mlflowDB),
 	}
 }
 

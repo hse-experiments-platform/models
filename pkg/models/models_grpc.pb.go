@@ -24,6 +24,8 @@ const (
 	ModelsService_GetFullModel_FullMethodName        = "/github.hse_experiments_platform.models.ModelsService/GetFullModel"
 	ModelsService_GetTrainedModels_FullMethodName    = "/github.hse_experiments_platform.models.ModelsService/GetTrainedModels"
 	ModelsService_GetFullTrainedModel_FullMethodName = "/github.hse_experiments_platform.models.ModelsService/GetFullTrainedModel"
+	ModelsService_GetTrainMetrics_FullMethodName     = "/github.hse_experiments_platform.models.ModelsService/GetTrainMetrics"
+	ModelsService_GetTrainCharts_FullMethodName      = "/github.hse_experiments_platform.models.ModelsService/GetTrainCharts"
 )
 
 // ModelsServiceClient is the client API for ModelsService service.
@@ -35,6 +37,8 @@ type ModelsServiceClient interface {
 	GetFullModel(ctx context.Context, in *GetFullModelRequest, opts ...grpc.CallOption) (*GetFullModelResponse, error)
 	GetTrainedModels(ctx context.Context, in *GetTrainedModelsRequest, opts ...grpc.CallOption) (*GetTrainedModelsResponse, error)
 	GetFullTrainedModel(ctx context.Context, in *GetFullTrainedModelRequest, opts ...grpc.CallOption) (*GetFullTrainedModelResponse, error)
+	GetTrainMetrics(ctx context.Context, in *GetTrainMetricsRequest, opts ...grpc.CallOption) (*GetTrainMetricsResponse, error)
+	GetTrainCharts(ctx context.Context, in *GetTrainChartsRequest, opts ...grpc.CallOption) (*GetTrainChartsResponse, error)
 }
 
 type modelsServiceClient struct {
@@ -90,6 +94,24 @@ func (c *modelsServiceClient) GetFullTrainedModel(ctx context.Context, in *GetFu
 	return out, nil
 }
 
+func (c *modelsServiceClient) GetTrainMetrics(ctx context.Context, in *GetTrainMetricsRequest, opts ...grpc.CallOption) (*GetTrainMetricsResponse, error) {
+	out := new(GetTrainMetricsResponse)
+	err := c.cc.Invoke(ctx, ModelsService_GetTrainMetrics_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *modelsServiceClient) GetTrainCharts(ctx context.Context, in *GetTrainChartsRequest, opts ...grpc.CallOption) (*GetTrainChartsResponse, error) {
+	out := new(GetTrainChartsResponse)
+	err := c.cc.Invoke(ctx, ModelsService_GetTrainCharts_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ModelsServiceServer is the server API for ModelsService service.
 // All implementations should embed UnimplementedModelsServiceServer
 // for forward compatibility
@@ -99,6 +121,8 @@ type ModelsServiceServer interface {
 	GetFullModel(context.Context, *GetFullModelRequest) (*GetFullModelResponse, error)
 	GetTrainedModels(context.Context, *GetTrainedModelsRequest) (*GetTrainedModelsResponse, error)
 	GetFullTrainedModel(context.Context, *GetFullTrainedModelRequest) (*GetFullTrainedModelResponse, error)
+	GetTrainMetrics(context.Context, *GetTrainMetricsRequest) (*GetTrainMetricsResponse, error)
+	GetTrainCharts(context.Context, *GetTrainChartsRequest) (*GetTrainChartsResponse, error)
 }
 
 // UnimplementedModelsServiceServer should be embedded to have forward compatible implementations.
@@ -119,6 +143,12 @@ func (UnimplementedModelsServiceServer) GetTrainedModels(context.Context, *GetTr
 }
 func (UnimplementedModelsServiceServer) GetFullTrainedModel(context.Context, *GetFullTrainedModelRequest) (*GetFullTrainedModelResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFullTrainedModel not implemented")
+}
+func (UnimplementedModelsServiceServer) GetTrainMetrics(context.Context, *GetTrainMetricsRequest) (*GetTrainMetricsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTrainMetrics not implemented")
+}
+func (UnimplementedModelsServiceServer) GetTrainCharts(context.Context, *GetTrainChartsRequest) (*GetTrainChartsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTrainCharts not implemented")
 }
 
 // UnsafeModelsServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -222,6 +252,42 @@ func _ModelsService_GetFullTrainedModel_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ModelsService_GetTrainMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTrainMetricsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ModelsServiceServer).GetTrainMetrics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ModelsService_GetTrainMetrics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModelsServiceServer).GetTrainMetrics(ctx, req.(*GetTrainMetricsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ModelsService_GetTrainCharts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTrainChartsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ModelsServiceServer).GetTrainCharts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ModelsService_GetTrainCharts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModelsServiceServer).GetTrainCharts(ctx, req.(*GetTrainChartsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ModelsService_ServiceDesc is the grpc.ServiceDesc for ModelsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -248,6 +314,14 @@ var ModelsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFullTrainedModel",
 			Handler:    _ModelsService_GetFullTrainedModel_Handler,
+		},
+		{
+			MethodName: "GetTrainMetrics",
+			Handler:    _ModelsService_GetTrainMetrics_Handler,
+		},
+		{
+			MethodName: "GetTrainCharts",
+			Handler:    _ModelsService_GetTrainCharts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

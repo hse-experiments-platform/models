@@ -252,6 +252,78 @@
           }
         ]
       }
+    },
+    "/api/v1/trained/{trainedModelID}/charts": {
+      "get": {
+        "operationId": "ModelsService_GetTrainCharts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/modelsGetTrainChartsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trainedModelID",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "ModelsService"
+        ],
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ]
+      }
+    },
+    "/api/v1/trained/{trainedModelID}/metrics": {
+      "get": {
+        "operationId": "ModelsService_GetTrainMetrics",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/modelsGetTrainMetricsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trainedModelID",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "ModelsService"
+        ],
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ]
+      }
     }
   },
   "definitions": {
@@ -263,6 +335,18 @@
         },
         "type": {
           "type": "string"
+        }
+      }
+    },
+    "modelsCVMetrics": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "format": "double"
+          }
         }
       }
     },
@@ -324,6 +408,36 @@
         }
       }
     },
+    "modelsGetTrainChartsResponse": {
+      "type": "object",
+      "properties": {
+        "cvChartsUrls": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "modelsGetTrainMetricsResponse": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "cvMetrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/modelsCVMetrics"
+          }
+        }
+      }
+    },
     "modelsGetTrainedModelsResponse": {
       "type": "object",
       "properties": {
@@ -357,6 +471,17 @@
         },
         "defaultValue": {}
       }
+    },
+    "modelsLaunchStatus": {
+      "type": "string",
+      "enum": [
+        "LaunchStatusUnknown",
+        "LaunchStatusNotStarted",
+        "LaunchStatusInProgress",
+        "LaunchStatusError",
+        "LaunchStatusSuccess"
+      ],
+      "default": "LaunchStatusUnknown"
     },
     "modelsMetric": {
       "type": "object",
@@ -478,7 +603,7 @@
           "type": "string"
         },
         "trainStatus": {
-          "$ref": "#/definitions/modelsTrainStatus"
+          "$ref": "#/definitions/modelsLaunchStatus"
         },
         "baseModelID": {
           "type": "string",
@@ -507,17 +632,6 @@
         }
       }
     },
-    "modelsTrainStatus": {
-      "type": "string",
-      "enum": [
-        "TrainStatusUnknown",
-        "TrainStatusNotStarted",
-        "TrainStatusInProgress",
-        "TrainStatusError",
-        "TrainStatusDone"
-      ],
-      "default": "TrainStatusUnknown"
-    },
     "modelsTrainedModel": {
       "type": "object",
       "properties": {
@@ -529,7 +643,7 @@
           "type": "string"
         },
         "trainStatus": {
-          "$ref": "#/definitions/modelsTrainStatus"
+          "$ref": "#/definitions/modelsLaunchStatus"
         },
         "baseModelID": {
           "type": "string",

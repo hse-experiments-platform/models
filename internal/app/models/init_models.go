@@ -25,6 +25,7 @@ func convertRow(row db.GetAllModelsRow) *core.ModelConfig {
 	return &core.ModelConfig{
 		ModelName:            row.Name,
 		ModelDescription:     row.Description,
+		ClassName:            row.ClassName.String,
 		Problem:              row.ProblemName,
 		TrainMetrics:         row.MetricNames,
 		TrainHyperparameters: hyperparameters,
@@ -66,6 +67,7 @@ func (s *modelsService) insertModels(ctx context.Context, modelHashes map[string
 					Name:        pgtype.Text{String: m.ModelName, Valid: true},
 					Description: pgtype.Text{String: m.ModelDescription, Valid: true},
 					Problem:     pgtype.Text{String: m.Problem, Valid: true},
+					ClassName:   pgtype.Text{String: m.ClassName, Valid: true},
 				})
 				if err != nil {
 					log.Error().Err(err).Msg("Failed to insert model")

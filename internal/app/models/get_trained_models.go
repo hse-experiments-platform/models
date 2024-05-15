@@ -37,31 +37,31 @@ func (s *modelsService) GetTrainedModels(ctx context.Context, req *pb.GetTrained
 		resp.Models = append(resp.Models, &pb.ShortTrainedModel{
 			TrainedModelID:   uint64(row.ID),
 			Name:             row.Name,
-			TrainStatus:      convertTrainingStatus(row.ModelTrainingStatus),
+			TrainStatus:      convertTrainingStatus(row.LaunchStatus),
 			BaseModelID:      uint64(row.ModelID),
 			BaseModelName:    row.ModelName,
 			ProblemName:      row.ProblemName,
 			TrainDatasetID:   uint64(row.TrainingDatasetID),
 			TrainDatasetName: row.TrainingDatasetName,
 			CreatedAt:        timestamppb.New(row.CreatedAt.Time),
-			LaunchID:         uint64(row.LaunchID),
+			LaunchID:         uint64(row.LaunchID.Int64),
 		})
 	}
 
 	return resp, nil
 }
 
-func convertTrainingStatus(s db.ModelTrainingStatus) pb.TrainStatus {
-	switch s {
-	case db.ModelTrainingStatusNotStarted:
-		return pb.TrainStatus_TrainStatusNotStarted
-	case db.ModelTrainingStatusInProgress:
-		return pb.TrainStatus_TrainStatusInProgress
-	case db.ModelTrainingStatusError:
-		return pb.TrainStatus_TrainStatusError
-	case db.ModelTrainingStatusDone:
-		return pb.TrainStatus_TrainStatusDone
+func convertTrainingStatus(status string) pb.LaunchStatus {
+	switch status {
+	case pb.LaunchStatus_LaunchStatusNotStarted.String():
+		return pb.LaunchStatus_LaunchStatusNotStarted
+	case pb.LaunchStatus_LaunchStatusInProgress.String():
+		return pb.LaunchStatus_LaunchStatusInProgress
+	case pb.LaunchStatus_LaunchStatusError.String():
+		return pb.LaunchStatus_LaunchStatusError
+	case pb.LaunchStatus_LaunchStatusSuccess.String():
+		return pb.LaunchStatus_LaunchStatusSuccess
 	default:
-		return pb.TrainStatus_TrainStatusUnknown
+		return pb.LaunchStatus_LaunchStatusUnknown
 	}
 }

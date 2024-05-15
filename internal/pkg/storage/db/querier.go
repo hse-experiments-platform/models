@@ -19,6 +19,7 @@ type Querier interface {
 	GetModels(ctx context.Context, arg GetModelsParams) ([]GetModelsRow, error)
 	GetProblems(ctx context.Context, arg GetProblemsParams) ([]GetProblemsRow, error)
 	GetTrainedModel(ctx context.Context, id int64) (GetTrainedModelRow, error)
+	GetTrainedModelRunID(ctx context.Context, trainedModelID int64) ([]byte, error)
 	GetTrainedModels(ctx context.Context, arg GetTrainedModelsParams) ([]GetTrainedModelsRow, error)
 }
 

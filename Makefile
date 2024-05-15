@@ -62,3 +62,4 @@ generate:
 .PHONY: sqlc-generate
 make sqlc-generate:
 	sqlc generate -f internal/pkg/storage/db/gen/sqlc.yaml
+	sqlc generate -f internal/pkg/storage/mlflowdb/gen/sqlc.yaml

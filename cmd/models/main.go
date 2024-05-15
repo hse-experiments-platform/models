@@ -72,6 +72,7 @@ func initDB(ctx context.Context, dsnOSKey string, loadTypes ...string) *pgxpool.
 func initService(ctx context.Context, maker token.Maker) pb.ModelsServiceServer {
 	service := models.NewService(
 		initDB(ctx, "DB_CONNECT_STRING"),
+		initDB(ctx, "MLFLOW_DB_CONNECT_STRING"),
 		maker,
 	)
 
