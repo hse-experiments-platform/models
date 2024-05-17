@@ -87,14 +87,14 @@ service ModelsService {
       security: {security_requirement: {key: "AccessToken";value: {}}}
     };
   };
-  rpc GetTrainCharts(GetTrainChartsRequest) returns (GetTrainChartsResponse) {
+  rpc GetTrainResults(GetTrainResultsRequest) returns (GetTrainResultsResponse) {
     option (google.api.http) = {
-      get: "/api/v1/trained/{trainedModelID}/charts"
+      get: "/api/v1/trained/{trainedModelID}/results"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       security: {security_requirement: {key: "AccessToken";value: {}}}
     };
-  };
+  }
   rpc GetPredictions(GetPredictionsRequest) returns (GetPredictionsResponse) {
     option (google.api.http) = {
       get: "/api/v1/trained/predictions"
@@ -257,14 +257,6 @@ message GetTrainMetricsResponse {
   repeated CVMetrics cvMetrics = 2;
 }
 
-message GetTrainChartsRequest {
-  uint64 trainedModelID = 1;
-}
-
-message GetTrainChartsResponse {
-  map<string, string> cvChartsUrls = 1;
-}
-
 message GetPredictionsRequest {
   uint64 limit = 1;
   uint64 offset = 2;
@@ -284,4 +276,25 @@ message PredictionInfo {
 message GetPredictionsResponse {
   repeated PredictionInfo predictions = 1;
   PageInfo pageInfo = 2;
+}
+
+message NumberMetric {
+  string name = 1;
+  double value = 2;
+}
+
+message ImageMetric {
+  string name = 1;
+  string graphicUrl = 2;
+}
+
+message GetTrainResultsRequest {
+  int64 trainedModelID = 1;
+}
+
+message GetTrainResultsResponse {
+  repeated NumberMetric test = 1;
+  repeated ImageMetric iterative = 2;
+  repeated ImageMetric cv = 3;
+  repeated ImageMetric imageImportanceVisualization = 4;
 }

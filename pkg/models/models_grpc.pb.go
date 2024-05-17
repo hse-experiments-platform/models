@@ -25,7 +25,7 @@ const (
 	ModelsService_GetTrainedModels_FullMethodName    = "/github.hse_experiments_platform.models.ModelsService/GetTrainedModels"
 	ModelsService_GetFullTrainedModel_FullMethodName = "/github.hse_experiments_platform.models.ModelsService/GetFullTrainedModel"
 	ModelsService_GetTrainMetrics_FullMethodName     = "/github.hse_experiments_platform.models.ModelsService/GetTrainMetrics"
-	ModelsService_GetTrainCharts_FullMethodName      = "/github.hse_experiments_platform.models.ModelsService/GetTrainCharts"
+	ModelsService_GetTrainResults_FullMethodName     = "/github.hse_experiments_platform.models.ModelsService/GetTrainResults"
 	ModelsService_GetPredictions_FullMethodName      = "/github.hse_experiments_platform.models.ModelsService/GetPredictions"
 )
 
@@ -39,7 +39,7 @@ type ModelsServiceClient interface {
 	GetTrainedModels(ctx context.Context, in *GetTrainedModelsRequest, opts ...grpc.CallOption) (*GetTrainedModelsResponse, error)
 	GetFullTrainedModel(ctx context.Context, in *GetFullTrainedModelRequest, opts ...grpc.CallOption) (*GetFullTrainedModelResponse, error)
 	GetTrainMetrics(ctx context.Context, in *GetTrainMetricsRequest, opts ...grpc.CallOption) (*GetTrainMetricsResponse, error)
-	GetTrainCharts(ctx context.Context, in *GetTrainChartsRequest, opts ...grpc.CallOption) (*GetTrainChartsResponse, error)
+	GetTrainResults(ctx context.Context, in *GetTrainResultsRequest, opts ...grpc.CallOption) (*GetTrainResultsResponse, error)
 	GetPredictions(ctx context.Context, in *GetPredictionsRequest, opts ...grpc.CallOption) (*GetPredictionsResponse, error)
 }
 
@@ -105,9 +105,9 @@ func (c *modelsServiceClient) GetTrainMetrics(ctx context.Context, in *GetTrainM
 	return out, nil
 }
 
-func (c *modelsServiceClient) GetTrainCharts(ctx context.Context, in *GetTrainChartsRequest, opts ...grpc.CallOption) (*GetTrainChartsResponse, error) {
-	out := new(GetTrainChartsResponse)
-	err := c.cc.Invoke(ctx, ModelsService_GetTrainCharts_FullMethodName, in, out, opts...)
+func (c *modelsServiceClient) GetTrainResults(ctx context.Context, in *GetTrainResultsRequest, opts ...grpc.CallOption) (*GetTrainResultsResponse, error) {
+	out := new(GetTrainResultsResponse)
+	err := c.cc.Invoke(ctx, ModelsService_GetTrainResults_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ type ModelsServiceServer interface {
 	GetTrainedModels(context.Context, *GetTrainedModelsRequest) (*GetTrainedModelsResponse, error)
 	GetFullTrainedModel(context.Context, *GetFullTrainedModelRequest) (*GetFullTrainedModelResponse, error)
 	GetTrainMetrics(context.Context, *GetTrainMetricsRequest) (*GetTrainMetricsResponse, error)
-	GetTrainCharts(context.Context, *GetTrainChartsRequest) (*GetTrainChartsResponse, error)
+	GetTrainResults(context.Context, *GetTrainResultsRequest) (*GetTrainResultsResponse, error)
 	GetPredictions(context.Context, *GetPredictionsRequest) (*GetPredictionsResponse, error)
 }
 
@@ -159,8 +159,8 @@ func (UnimplementedModelsServiceServer) GetFullTrainedModel(context.Context, *Ge
 func (UnimplementedModelsServiceServer) GetTrainMetrics(context.Context, *GetTrainMetricsRequest) (*GetTrainMetricsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTrainMetrics not implemented")
 }
-func (UnimplementedModelsServiceServer) GetTrainCharts(context.Context, *GetTrainChartsRequest) (*GetTrainChartsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTrainCharts not implemented")
+func (UnimplementedModelsServiceServer) GetTrainResults(context.Context, *GetTrainResultsRequest) (*GetTrainResultsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTrainResults not implemented")
 }
 func (UnimplementedModelsServiceServer) GetPredictions(context.Context, *GetPredictionsRequest) (*GetPredictionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPredictions not implemented")
@@ -285,20 +285,20 @@ func _ModelsService_GetTrainMetrics_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ModelsService_GetTrainCharts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTrainChartsRequest)
+func _ModelsService_GetTrainResults_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTrainResultsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ModelsServiceServer).GetTrainCharts(ctx, in)
+		return srv.(ModelsServiceServer).GetTrainResults(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ModelsService_GetTrainCharts_FullMethodName,
+		FullMethod: ModelsService_GetTrainResults_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ModelsServiceServer).GetTrainCharts(ctx, req.(*GetTrainChartsRequest))
+		return srv.(ModelsServiceServer).GetTrainResults(ctx, req.(*GetTrainResultsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -353,8 +353,8 @@ var ModelsService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ModelsService_GetTrainMetrics_Handler,
 		},
 		{
-			MethodName: "GetTrainCharts",
-			Handler:    _ModelsService_GetTrainCharts_Handler,
+			MethodName: "GetTrainResults",
+			Handler:    _ModelsService_GetTrainResults_Handler,
 		},
 		{
 			MethodName: "GetPredictions",

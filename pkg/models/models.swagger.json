@@ -309,14 +309,14 @@
         ]
       }
     },
-    "/api/v1/trained/{trainedModelID}/charts": {
+    "/api/v1/trained/{trainedModelID}/metrics": {
       "get": {
-        "operationId": "ModelsService_GetTrainCharts",
+        "operationId": "ModelsService_GetTrainMetrics",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/modelsGetTrainChartsResponse"
+              "$ref": "#/definitions/modelsGetTrainMetricsResponse"
             }
           },
           "default": {
@@ -345,14 +345,14 @@
         ]
       }
     },
-    "/api/v1/trained/{trainedModelID}/metrics": {
+    "/api/v1/trained/{trainedModelID}/results": {
       "get": {
-        "operationId": "ModelsService_GetTrainMetrics",
+        "operationId": "ModelsService_GetTrainResults",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/modelsGetTrainMetricsResponse"
+              "$ref": "#/definitions/modelsGetTrainResultsResponse"
             }
           },
           "default": {
@@ -368,7 +368,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "format": "uint64"
+            "format": "int64"
           }
         ],
         "tags": [
@@ -479,17 +479,6 @@
         }
       }
     },
-    "modelsGetTrainChartsResponse": {
-      "type": "object",
-      "properties": {
-        "cvChartsUrls": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "modelsGetTrainMetricsResponse": {
       "type": "object",
       "properties": {
@@ -505,6 +494,39 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/modelsCVMetrics"
+          }
+        }
+      }
+    },
+    "modelsGetTrainResultsResponse": {
+      "type": "object",
+      "properties": {
+        "test": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/modelsNumberMetric"
+          }
+        },
+        "iterative": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/modelsImageMetric"
+          }
+        },
+        "cv": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/modelsImageMetric"
+          }
+        },
+        "imageImportanceVisualization": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/modelsImageMetric"
           }
         }
       }
@@ -541,6 +563,17 @@
           "type": "string"
         },
         "defaultValue": {}
+      }
+    },
+    "modelsImageMetric": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "graphicUrl": {
+          "type": "string"
+        }
       }
     },
     "modelsLaunchStatus": {
@@ -591,6 +624,18 @@
         },
         "problem": {
           "$ref": "#/definitions/modelsProblem"
+        }
+      }
+    },
+    "modelsNumberMetric": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
         }
       }
     },

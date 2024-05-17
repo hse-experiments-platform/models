@@ -295,8 +295,8 @@ func local_request_ModelsService_GetTrainMetrics_0(ctx context.Context, marshale
 
 }
 
-func request_ModelsService_GetTrainCharts_0(ctx context.Context, marshaler runtime.Marshaler, client ModelsServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetTrainChartsRequest
+func request_ModelsService_GetTrainResults_0(ctx context.Context, marshaler runtime.Marshaler, client ModelsServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetTrainResultsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -311,18 +311,18 @@ func request_ModelsService_GetTrainCharts_0(ctx context.Context, marshaler runti
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "trainedModelID")
 	}
 
-	protoReq.TrainedModelID, err = runtime.Uint64(val)
+	protoReq.TrainedModelID, err = runtime.Int64(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "trainedModelID", err)
 	}
 
-	msg, err := client.GetTrainCharts(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetTrainResults(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_ModelsService_GetTrainCharts_0(ctx context.Context, marshaler runtime.Marshaler, server ModelsServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetTrainChartsRequest
+func local_request_ModelsService_GetTrainResults_0(ctx context.Context, marshaler runtime.Marshaler, server ModelsServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetTrainResultsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -337,12 +337,12 @@ func local_request_ModelsService_GetTrainCharts_0(ctx context.Context, marshaler
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "trainedModelID")
 	}
 
-	protoReq.TrainedModelID, err = runtime.Uint64(val)
+	protoReq.TrainedModelID, err = runtime.Int64(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "trainedModelID", err)
 	}
 
-	msg, err := server.GetTrainCharts(ctx, &protoReq)
+	msg, err := server.GetTrainResults(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -539,7 +539,7 @@ func RegisterModelsServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 
 	})
 
-	mux.Handle("GET", pattern_ModelsService_GetTrainCharts_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ModelsService_GetTrainResults_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -547,12 +547,12 @@ func RegisterModelsServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/github.hse_experiments_platform.models.ModelsService/GetTrainCharts", runtime.WithHTTPPathPattern("/api/v1/trained/{trainedModelID}/charts"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/github.hse_experiments_platform.models.ModelsService/GetTrainResults", runtime.WithHTTPPathPattern("/api/v1/trained/{trainedModelID}/results"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_ModelsService_GetTrainCharts_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_ModelsService_GetTrainResults_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -560,7 +560,7 @@ func RegisterModelsServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 			return
 		}
 
-		forward_ModelsService_GetTrainCharts_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ModelsService_GetTrainResults_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -762,25 +762,25 @@ func RegisterModelsServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 
 	})
 
-	mux.Handle("GET", pattern_ModelsService_GetTrainCharts_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ModelsService_GetTrainResults_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/github.hse_experiments_platform.models.ModelsService/GetTrainCharts", runtime.WithHTTPPathPattern("/api/v1/trained/{trainedModelID}/charts"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/github.hse_experiments_platform.models.ModelsService/GetTrainResults", runtime.WithHTTPPathPattern("/api/v1/trained/{trainedModelID}/results"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_ModelsService_GetTrainCharts_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ModelsService_GetTrainResults_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_ModelsService_GetTrainCharts_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ModelsService_GetTrainResults_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -822,7 +822,7 @@ var (
 
 	pattern_ModelsService_GetTrainMetrics_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "trained", "trainedModelID", "metrics"}, ""))
 
-	pattern_ModelsService_GetTrainCharts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "trained", "trainedModelID", "charts"}, ""))
+	pattern_ModelsService_GetTrainResults_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "trained", "trainedModelID", "results"}, ""))
 
 	pattern_ModelsService_GetPredictions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "trained", "predictions"}, ""))
 )
@@ -840,7 +840,7 @@ var (
 
 	forward_ModelsService_GetTrainMetrics_0 = runtime.ForwardResponseMessage
 
-	forward_ModelsService_GetTrainCharts_0 = runtime.ForwardResponseMessage
+	forward_ModelsService_GetTrainResults_0 = runtime.ForwardResponseMessage
 
 	forward_ModelsService_GetPredictions_0 = runtime.ForwardResponseMessage
 )
