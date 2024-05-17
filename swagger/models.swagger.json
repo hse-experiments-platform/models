@@ -217,6 +217,62 @@
         ]
       }
     },
+    "/api/v1/trained/predictions": {
+      "get": {
+        "operationId": "ModelsService_GetPredictions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/modelsGetPredictionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "trainedModelID",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "ModelsService"
+        ],
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ]
+      }
+    },
     "/api/v1/trained/{trainedModelID}": {
       "get": {
         "operationId": "ModelsService_GetFullTrainedModel",
@@ -393,6 +449,21 @@
         }
       }
     },
+    "modelsGetPredictionsResponse": {
+      "type": "object",
+      "properties": {
+        "predictions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/modelsPredictionInfo"
+          }
+        },
+        "pageInfo": {
+          "$ref": "#/definitions/modelsPageInfo"
+        }
+      }
+    },
     "modelsGetProblemsResponse": {
       "type": "object",
       "properties": {
@@ -537,6 +608,31 @@
         "total": {
           "type": "string",
           "format": "uint64"
+        }
+      }
+    },
+    "modelsPredictionInfo": {
+      "type": "object",
+      "properties": {
+        "launchID": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/modelsLaunchStatus"
+        },
+        "datasetName": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "startDateTime": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },

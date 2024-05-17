@@ -41,7 +41,8 @@ func (q *Queries) CreateHyperparameters(ctx context.Context, arg CreateHyperpara
 
 const createModel = `-- name: CreateModel :one
 insert into models (name, description, problem_id, class_name)
-values ($1, $2, (select id from problems where name = $3), $4)
+values ($1, $2, (select id from problems where name = $3),
+        $4)
 returning id
 `
 
@@ -291,6 +292,79 @@ func (q *Queries) GetModels(ctx context.Context, arg GetModelsParams) ([]GetMode
 			&i.ID,
 			&i.Name,
 			&i.Description,
+			&i.Count,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPredictions = `-- name: GetPredictions :many
+select l.id,
+       l.name,
+       l.created_at,
+       l.launch_status,
+       tm.target_col,
+       d.name           as dataset_name,
+       count(1) over () as count
+from launches l
+         join public.trained_models tm on tm.id = (l.input ->> 'trainedModelID')::bigint
+         join public.datasets d on d.id = tm.train_dataset_id
+where launch_status = $1
+  and l.name like $6
+  and launch_type = $2
+  and (tm.id = $5 or $5 = 0)
+order by created_at desc
+limit $3 offset $4
+`
+
+type GetPredictionsParams struct {
+	LaunchStatus   string
+	LaunchType     string
+	Limit          int64
+	Offset         int64
+	TrainedModelID int64
+	Name           string
+}
+
+type GetPredictionsRow struct {
+	ID           int64
+	Name         string
+	CreatedAt    pgtype.Timestamptz
+	LaunchStatus string
+	TargetCol    string
+	DatasetName  string
+	Count        pgtype.Int8
+}
+
+func (q *Queries) GetPredictions(ctx context.Context, arg GetPredictionsParams) ([]GetPredictionsRow, error) {
+	rows, err := q.db.Query(ctx, getPredictions,
+		arg.LaunchStatus,
+		arg.LaunchType,
+		arg.Limit,
+		arg.Offset,
+		arg.TrainedModelID,
+		arg.Name,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPredictionsRow
+	for rows.Next() {
+		var i GetPredictionsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CreatedAt,
+			&i.LaunchStatus,
+			&i.TargetCol,
+			&i.DatasetName,
 			&i.Count,
 		); err != nil {
 			return nil, err

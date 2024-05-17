@@ -17,6 +17,7 @@ type Querier interface {
 	GetModelHyperparameters(ctx context.Context, id int64) ([]GetModelHyperparametersRow, error)
 	GetModelProblem(ctx context.Context, id int64) (GetModelProblemRow, error)
 	GetModels(ctx context.Context, arg GetModelsParams) ([]GetModelsRow, error)
+	GetPredictions(ctx context.Context, arg GetPredictionsParams) ([]GetPredictionsRow, error)
 	GetProblems(ctx context.Context, arg GetProblemsParams) ([]GetProblemsRow, error)
 	GetTrainedModel(ctx context.Context, id int64) (GetTrainedModelRow, error)
 	GetTrainedModelRunID(ctx context.Context, trainedModelID int64) ([]byte, error)

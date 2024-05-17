@@ -26,6 +26,7 @@ const (
 	ModelsService_GetFullTrainedModel_FullMethodName = "/github.hse_experiments_platform.models.ModelsService/GetFullTrainedModel"
 	ModelsService_GetTrainMetrics_FullMethodName     = "/github.hse_experiments_platform.models.ModelsService/GetTrainMetrics"
 	ModelsService_GetTrainCharts_FullMethodName      = "/github.hse_experiments_platform.models.ModelsService/GetTrainCharts"
+	ModelsService_GetPredictions_FullMethodName      = "/github.hse_experiments_platform.models.ModelsService/GetPredictions"
 )
 
 // ModelsServiceClient is the client API for ModelsService service.
@@ -39,6 +40,7 @@ type ModelsServiceClient interface {
 	GetFullTrainedModel(ctx context.Context, in *GetFullTrainedModelRequest, opts ...grpc.CallOption) (*GetFullTrainedModelResponse, error)
 	GetTrainMetrics(ctx context.Context, in *GetTrainMetricsRequest, opts ...grpc.CallOption) (*GetTrainMetricsResponse, error)
 	GetTrainCharts(ctx context.Context, in *GetTrainChartsRequest, opts ...grpc.CallOption) (*GetTrainChartsResponse, error)
+	GetPredictions(ctx context.Context, in *GetPredictionsRequest, opts ...grpc.CallOption) (*GetPredictionsResponse, error)
 }
 
 type modelsServiceClient struct {
@@ -112,6 +114,15 @@ func (c *modelsServiceClient) GetTrainCharts(ctx context.Context, in *GetTrainCh
 	return out, nil
 }
 
+func (c *modelsServiceClient) GetPredictions(ctx context.Context, in *GetPredictionsRequest, opts ...grpc.CallOption) (*GetPredictionsResponse, error) {
+	out := new(GetPredictionsResponse)
+	err := c.cc.Invoke(ctx, ModelsService_GetPredictions_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ModelsServiceServer is the server API for ModelsService service.
 // All implementations should embed UnimplementedModelsServiceServer
 // for forward compatibility
@@ -123,6 +134,7 @@ type ModelsServiceServer interface {
 	GetFullTrainedModel(context.Context, *GetFullTrainedModelRequest) (*GetFullTrainedModelResponse, error)
 	GetTrainMetrics(context.Context, *GetTrainMetricsRequest) (*GetTrainMetricsResponse, error)
 	GetTrainCharts(context.Context, *GetTrainChartsRequest) (*GetTrainChartsResponse, error)
+	GetPredictions(context.Context, *GetPredictionsRequest) (*GetPredictionsResponse, error)
 }
 
 // UnimplementedModelsServiceServer should be embedded to have forward compatible implementations.
@@ -149,6 +161,9 @@ func (UnimplementedModelsServiceServer) GetTrainMetrics(context.Context, *GetTra
 }
 func (UnimplementedModelsServiceServer) GetTrainCharts(context.Context, *GetTrainChartsRequest) (*GetTrainChartsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTrainCharts not implemented")
+}
+func (UnimplementedModelsServiceServer) GetPredictions(context.Context, *GetPredictionsRequest) (*GetPredictionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPredictions not implemented")
 }
 
 // UnsafeModelsServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -288,6 +303,24 @@ func _ModelsService_GetTrainCharts_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ModelsService_GetPredictions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPredictionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ModelsServiceServer).GetPredictions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ModelsService_GetPredictions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModelsServiceServer).GetPredictions(ctx, req.(*GetPredictionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ModelsService_ServiceDesc is the grpc.ServiceDesc for ModelsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -322,6 +355,10 @@ var ModelsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTrainCharts",
 			Handler:    _ModelsService_GetTrainCharts_Handler,
+		},
+		{
+			MethodName: "GetPredictions",
+			Handler:    _ModelsService_GetPredictions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

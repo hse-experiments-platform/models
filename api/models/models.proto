@@ -95,6 +95,14 @@ service ModelsService {
       security: {security_requirement: {key: "AccessToken";value: {}}}
     };
   };
+  rpc GetPredictions(GetPredictionsRequest) returns (GetPredictionsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/trained/predictions"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      security: {security_requirement: {key: "AccessToken";value: {}}}
+    };
+  }
 }
 
 message Hyperparameter {
@@ -255,4 +263,25 @@ message GetTrainChartsRequest {
 
 message GetTrainChartsResponse {
   map<string, string> cvChartsUrls = 1;
+}
+
+message GetPredictionsRequest {
+  uint64 limit = 1;
+  uint64 offset = 2;
+  string query = 3;
+  uint64 trainedModelID = 4;
+}
+
+message PredictionInfo {
+  int64 launchID = 1;
+  string name = 2;
+  LaunchStatus status = 3;
+  string datasetName = 4;
+  string target = 5;
+  google.protobuf.Timestamp startDateTime = 6;
+}
+
+message GetPredictionsResponse {
+  repeated PredictionInfo predictions = 1;
+  PageInfo pageInfo = 2;
 }

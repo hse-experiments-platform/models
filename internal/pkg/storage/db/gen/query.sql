@@ -118,7 +118,8 @@ from models m
 
 -- name: CreateModel :one
 insert into models (name, description, problem_id, class_name)
-values (sqlc.arg(name), sqlc.arg(description), (select id from problems where name = sqlc.arg(problem)), sqlc.arg(class_name))
+values (sqlc.arg(name), sqlc.arg(description), (select id from problems where name = sqlc.arg(problem)),
+        sqlc.arg(class_name))
 returning id;
 
 -- name: CreateHyperparameters :exec
@@ -138,3 +139,21 @@ select output
 from trained_models tm
          join launches l on tm.launch_id = l.id
 where tm.id = sqlc.arg(trained_model_id);
+
+-- name: GetPredictions :many
+select l.id,
+       l.name,
+       l.created_at,
+       l.launch_status,
+       tm.target_col,
+       d.name           as dataset_name,
+       count(1) over () as count
+from launches l
+         join public.trained_models tm on tm.id = (l.input ->> 'trainedModelID')::bigint
+         join public.datasets d on d.id = tm.train_dataset_id
+where launch_status = $1
+  and l.name like $6
+  and launch_type = $2
+  and (tm.id = sqlc.arg(trained_model_id) or sqlc.arg(trained_model_id) = 0)
+order by created_at desc
+limit $3 offset $4;
