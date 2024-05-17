@@ -38,7 +38,7 @@ func (c *ModelConfig) Validate() error {
 		return errors.New("model_description cannot be empty")
 	}
 
-	if c.Problem != "regression" && c.Problem != "classification" && c.Problem != "clusterization" {
+	if c.Problem != "Regression" && c.Problem != "Classification" && c.Problem != "Clusterization" {
 		return fmt.Errorf("problem must be one of 'regression', 'classification', or 'clusterization', got '%s'", c.Problem)
 	}
 
