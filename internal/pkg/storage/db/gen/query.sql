@@ -85,7 +85,7 @@ select tm.id,
        d.name        as training_dataset_name,
        tm.created_at,
        tm.launch_id,
-       tm.target_column
+       tm.target_col
 from trained_models tm
          join models m on tm.base_model_id = m.id
          join problems p on m.problem_id = p.id
